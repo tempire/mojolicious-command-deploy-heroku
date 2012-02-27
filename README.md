@@ -20,9 +20,9 @@ These options are available:
 </pre>
 
 # Workflow
-
-* Follow quickstart instructions
-  1. Create account on http://heroku.com/
+ 
+* Folt instructions - http://devcenter.heroku.com/articles/quickstart
+  1. Sign up @ http://heroku.com/
   2. Install toolbelt
   3. Login
 

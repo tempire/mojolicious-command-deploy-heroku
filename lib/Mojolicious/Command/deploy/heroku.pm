@@ -59,10 +59,18 @@ sub validate {
   my $self = shift;
   my $opt  = shift;
 
-  return if !defined $opt->{create} and !defined $opt->{name};
-  return if !defined $opt->{api_key};
+  my @errors;
 
-  return 1;
+  # Create or appname
+  push @errors => '--create or --appname must be specified'
+    if !defined $opt->{create} and !defined $opt->{name};
+
+  # API Key
+  push @errors => 'API key not specified, and not found in '
+    . $self->credentials_file
+    if !defined $opt->{api_key};
+
+  return @errors;
 }
 
 sub run {
@@ -80,8 +88,9 @@ sub run {
 
   $opt->{api_key} //= $self->api_key;
 
-  # Validate
-  die $self->usage if !$self->validate($opt);
+  # Validate, exit if errors
+  my @errors = $self->validate($opt);
+  die "\n" . join("\n" => @errors) . "\n" . $self->usage if @errors;
 
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
 

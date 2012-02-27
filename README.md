@@ -27,7 +27,7 @@ These options are available:
 2. Install the Heroku Toolbelt
 <dl>
     <dt>OSX</dt><dd>https://toolbelt.herokuapp.com/download/osx</dd>
-    <dt>Ubuntu</dt><dd>`wget -qO- https://toolbelt.heroku.com/install.sh | sh`</dd>
+    <dt>Ubuntu</dt><dd><code>wget -qO- https://toolbelt.heroku.com/install.sh | sh</code></dd>
     <dt>Windows</dt><dd>https://toolbelt.herokuapp.com/download/windows</dd>
 </dl>
 

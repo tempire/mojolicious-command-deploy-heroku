@@ -19,11 +19,18 @@ These options are available:
   -h, --help                This message
 </pre>
 
-# Example
+# Workflow
+
+* Follow quickstart instructions
+  1. Create account on http://heroku.com/
+  2. Install toolbelt
+  3. Login
+
+* Create and deploy:
 <pre>
 mojo generate app MyApp
 cd my_app
 script/my_app generate makefile
 script/my_app generate heroku
-script/my_app deploy heroku
+script/my_app deploy heroku --create
 </pre>

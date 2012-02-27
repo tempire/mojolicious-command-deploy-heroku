@@ -4,9 +4,6 @@ use Mojo::Base 'Mojo::Command';
 has description => qq/Generate "Heroku configuration".\n/;
 has usage       => "usage: $0 generate heroku\n";
 
-# "If we don't go back there and make that event happen,
-#  the entire universe will be destroyed...
-#  And as an environmentalist, I'm against that."
 sub run {
   my $self        = shift;
   my $class       = $ENV{MOJO_APP} || 'MyApp';

@@ -21,9 +21,9 @@ These options are available:
 
 # Workflow
  
-* Folt instructions - http://devcenter.heroku.com/articles/quickstart
-  1. Sign up @ http://heroku.com/
-  2. Install toolbelt
+* Quickstart instructions (http://devcenter.heroku.com/articles/quickstart)
+  1. Sign up - https://api.heroku.com/signup
+  2. Install the Heroku Toolbelt
   3. Login
 
 * Create and deploy:

@@ -146,15 +146,15 @@ sub create_repo {
 sub fill_repo {
   my ($r, $files) = map {pop} 1 .. 2;
 
-  my @ignore = git($r, 'ls-files' => '--others' => '-i' =>  '--exclude-standard');
-  #@$files = grep {!grep $_ =~ /\W*$_\W*/ => @ignore} @$files;
+  # Files matched by .gitignore
+  my @ignore =
+    git($r, 'ls-files' => '--others' => '-i' => '--exclude-standard');
 
-  my @tmp;
-  for my $file (@$files) {
-    push @tmp => $file if !grep $file =~ /$_\W*/ => @ignore;
-  }
+  # Add files filtered by .gitignore
+  git($r,
+    add => grep { my $file = $_; $file if !grep $file =~ /$_\W*/ => @ignore }
+      @$files);
 
-  git($r, add => @tmp);
   git($r, commit => '-m' => 'Initial Commit');
 
   return @_, $r;

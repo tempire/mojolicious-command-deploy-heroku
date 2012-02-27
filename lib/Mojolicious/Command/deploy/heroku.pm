@@ -85,16 +85,6 @@ sub run {
 
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
 
-  #my @files = @{$self->app->home->list_files};
-  #my @tmp;
-  #if (my @ignore = slurp '.gitignore', chomp => 1) {
-  #  for my $file (@files) {
-  #    push @tmp => $file if !grep $file =~ /\W*$_\W*/ => @ignore;
-  #  }
-  #}
-  #die Dumper \@tmp;
-
-
   my ($res) = verify_app(
     config_app(
       create_or_get_app(

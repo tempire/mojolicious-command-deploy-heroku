@@ -28,9 +28,11 @@ These options are available:
 
 * Install mojo command:
 
-    cpanm https://github.com/tempire/mojolicious-command-deploy/raw/master/Mojolicious-Command-deploy-0.01.tar.gz \
-          https://github.com/tempire/mojolicious-command-deploy-heroku/raw/master/Mojolicious-Command-deploy-heroku-0.01.tar.gz
- 
+<pre>
+cpanm https://github.com/tempire/mojolicious-command-deploy/raw/master/Mojolicious-Command-deploy-0.01.tar.gz \
+      https://github.com/tempire/mojolicious-command-deploy-heroku/raw/master/Mojolicious-Command-deploy-heroku-0.01.tar.gz
+</pre>
+
 * Create and deploy:
 <pre>
 mojo generate app MyApp

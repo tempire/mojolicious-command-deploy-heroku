@@ -26,6 +26,13 @@ These options are available:
   2. Install the Heroku Toolbelt
   3. Login
 
+* Install mojo command:
+
+<pre>
+cpanm https://github.com/tempire/mojolicious-command-deploy/raw/master/Mojolicious-Command-deploy-0.01.tar.gz \
+      https://github.com/tempire/mojolicious-command-deploy-heroku/raw/master/Mojolicious-Command-deploy-heroku-0.01.tar.gz
+</pre>
+
 * Create and deploy:
 <pre>
 mojo generate app MyApp

@@ -13,6 +13,9 @@ use Mojo::UserAgent;
 use Mojo::IOLoop;
 use File::Spec;
 use File::Slurp 'slurp';
+use Data::Dumper;
+
+$|++;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -78,9 +81,6 @@ sub run {
   # Validate
   die $self->usage if !$self->validate($opt);
 
-  # Create
-  print "Creating Heroku app...";
-
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
 
   my ($res) = verify_app(
@@ -91,8 +91,6 @@ sub run {
       )
     )
   );
-
-  say $res->{name};
 
   # Upload
   print "Uploading $class to $res->{name}...";
@@ -159,13 +157,14 @@ sub create_or_get_app {
   my ($h, $opt) = map {pop} 1 .. 2;
 
   # Attempt create
-  my $res = %{$h->create(name => $opt->{name})};
+  my $res = {$h->create(name => $opt->{name})};
+  my $error = $h->error;
 
   # Attempt retrieval
-  res = [$h->apps(name => $opt->{name})]->[0]
-    if $h->error eq 'Name is already taken';
+  $res = shift @{[grep $_->{name} eq $opt->{name} => $h->apps]}
+    if $h->error and $h->error eq 'Name is already taken';
 
-  die "Create/get failed for $opt->{name}: " . $h->error if !$res;
+  say "Upload failed for $opt->{name}: " . $error and exit if !$res;
 
   return @_, $h, $res;
 }
@@ -174,7 +173,7 @@ sub create_or_get_app {
 sub config_app {
   my ($res, $h, $config) = map {pop} 1 .. 3;
 
-  die "configuration failed for app $res->{name}: " . $h->error
+  say "Configuration failed for app $res->{name}: " . $h->error and exit
     if !$h->add_config(name => $res->{name}, %$config);
 
   return @_, $h, $res;

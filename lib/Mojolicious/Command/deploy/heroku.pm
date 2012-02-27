@@ -66,7 +66,7 @@ sub validate {
 }
 
 sub run {
-  my $self  = shift;
+  my $self = shift;
   my $class = $ENV{MOJO_APP} || 'MyApp';
   my $name =
     ref $class eq 'Mojolicious::Lite' ? +($0 =~ /^\W*(.+)$/)[0] : $class;
@@ -84,6 +84,7 @@ sub run {
   die $self->usage if !$self->validate($opt);
 
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
+
   #my @files = @{$self->app->home->list_files};
   #my @tmp;
   #if (my @ignore = slurp '.gitignore', chomp => 1) {

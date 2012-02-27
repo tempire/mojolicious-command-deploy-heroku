@@ -5,9 +5,14 @@ has description => qq/Generate "Heroku configuration".\n/;
 has usage       => "usage: $0 generate heroku\n";
 
 sub run {
-  my $self        = shift;
-  my $class       = $ENV{MOJO_APP} || 'MyApp';
-  my $script_name = 'script/' . $self->class_to_file($class);
+  my $self = shift;
+  my $class = $ENV{MOJO_APP} || 'MyApp';
+
+  my $script_name =
+    ref $class eq 'Mojolicious::Lite'
+    ? $0
+    : 'script/' . $self->class_to_file($class);
+
   $self->render_to_rel_file(perloku => Perloku => $script_name);
   $self->chmod_file('Perloku' => 0744);
 }

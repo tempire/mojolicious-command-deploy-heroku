@@ -67,7 +67,9 @@ sub validate {
 
 sub run {
   my $self  = shift;
-  my $class = $ENV{MOJO_APP};
+  my $class = $ENV{MOJO_APP} || 'MyApp';
+  my $name =
+    ref $class eq 'Mojolicious::Lite' ? +($0 =~ /^\W*(.+)$/)[0] : $class;
 
   # App home dir
   $self->ua->app($class);
@@ -82,6 +84,15 @@ sub run {
   die $self->usage if !$self->validate($opt);
 
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
+  #my @files = @{$self->app->home->list_files};
+  #my @tmp;
+  #if (my @ignore = slurp '.gitignore', chomp => 1) {
+  #  for my $file (@files) {
+  #    push @tmp => $file if !grep $file =~ /\W*$_\W*/ => @ignore;
+  #  }
+  #}
+  #die Dumper \@tmp;
+
 
   my ($res) = verify_app(
     config_app(
@@ -93,7 +104,7 @@ sub run {
   );
 
   # Upload
-  print "Uploading $class to $res->{name}...";
+  print "Uploading $name to $res->{name}...";
   push_repo(
     fill_repo(
       create_repo(
@@ -107,9 +118,12 @@ sub run {
 
 sub api_key {
   my $self = shift;
+
   return if !-T $self->credentials_file;
+
   my $api_key = +(slurp $self->credentials_file)[-1];
   chomp $api_key;
+
   return $api_key;
 }
 
@@ -132,7 +146,15 @@ sub create_repo {
 sub fill_repo {
   my ($r, $files) = map {pop} 1 .. 2;
 
-  git($r, add => @$files);
+  my @ignore = git($r, 'ls-files' => '--others' => '-i' =>  '--exclude-standard');
+  #@$files = grep {!grep $_ =~ /\W*$_\W*/ => @ignore} @$files;
+
+  my @tmp;
+  for my $file (@$files) {
+    push @tmp => $file if !grep $file =~ /$_\W*/ => @ignore;
+  }
+
+  git($r, add => @tmp);
   git($r, commit => '-m' => 'Initial Commit');
 
   return @_, $r;
@@ -149,7 +171,7 @@ sub push_repo {
 }
 
 sub git {
-  return 1 if shift->run(@_);
+  return shift->run(@_);
 }
 
 # T :: (A, $opt, $h) -> (A, $res)

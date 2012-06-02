@@ -1,21 +1,15 @@
 package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojo::Command';
 
-# Developer's note:
-#   Experiment using concatenative style.
-#   Type signatures provided, and may make sense in light of:
-#   http://evincarofautumn.blogspot.com/2012/02/why-concatenative-programming-matters.html
-
-use Getopt::Long qw/GetOptions :config no_auto_abbrev no_ignore_case/;
-use Net::Heroku;
-use Git::Repository;
-use Mojo::UserAgent;
-use Mojo::IOLoop;
-use File::Spec;
-use File::Slurp 'slurp';
 use Data::Dumper;
-
-$|++;
+use File::Slurp 'slurp';
+use File::Spec;
+use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
+use Git::Repository;
+use IPC::Cmd 'can_run';
+use Mojo::IOLoop;
+use Mojo::UserAgent;
+use Net::Heroku;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -23,6 +17,7 @@ has description      => "Deploy Mojolicious app to Heroku.\n";
 has opt              => sub { {} };
 has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
 has usage            => <<"EOF";
+
 
 usage: $0 deploy heroku [OPTIONS]
 
@@ -58,6 +53,8 @@ sub validate {
 
   my @errors;
 
+  push @errors => 'git command not found' if !can_run('git');
+
   # Create or appname
   push @errors => '--create or --appname must be specified'
     if !defined $opt->{create} and !defined $opt->{name};
@@ -86,18 +83,19 @@ sub run {
 
   $opt->{api_key} //= $self->api_key;
 
-  # Validate, exit if errors
+  # Validate
   my @errors = $self->validate($opt);
   die "\n" . join("\n" => @errors) . "\n" . $self->usage if @errors;
 
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
 
-  my ($res) = verify_app(
+  # Create
+  my $res = verify_app(
+    $h,
     config_app(
-      create_or_get_app(
-        {BUILDPACK_URL => 'http://github.com/tempire/perloku.git'},
-        $opt, $h
-      )
+      $h,
+      create_or_get_app($h, $opt),
+      {BUILDPACK_URL => 'http://github.com/tempire/perloku.git'}
     )
   );
 
@@ -105,13 +103,13 @@ sub run {
   print "Uploading $name to $res->{name}...";
   push_repo(
     fill_repo(
-      create_repo(
-        $res, $self->app->home->list_files,
-        $home_dir, $self->tmpdir
-      )
-    )
+      $self->create_repo($home_dir, $self->tmpdir),
+      $self->app->home->list_files
+    ),
+    $res
   );
-  say 'done.';
+
+  print "done.\n";
 }
 
 sub api_key {
@@ -125,24 +123,21 @@ sub api_key {
   return $api_key;
 }
 
-# T :: (A, $home_dir, $tmp_dir) -> (A, $r)
 sub create_repo {
-  my ($tmp_dir, $home_dir) = map {pop} 1 .. 2;
+  my ($self, $home_dir, $tmp_dir) = @_;
 
   my $git_dir = $tmp_dir . '/mojo_deploy_git_' . int rand 1000;
 
   Git::Repository->run(init => $git_dir);
 
-  return @_,
-    Git::Repository->new(
+  return Git::Repository->new(
     work_tree => $home_dir,
     git_dir   => $git_dir . '/.git'
-    );
+  );
 }
 
-# T :: (A, $files, $r) -> (A, $r)
 sub fill_repo {
-  my ($r, $files) = map {pop} 1 .. 2;
+  my ($r, $files) = @_;
 
   # Files matched by .gitignore
   my @ignore =
@@ -155,26 +150,27 @@ sub fill_repo {
 
   git($r, commit => '-m' => 'Initial Commit');
 
-  return @_, $r;
+  return $r;
 }
 
-# T :: (A, $name, $res, $r) -> (A, $r)
 sub push_repo {
-  my ($r, $res, $name) = map {pop} 1 .. 3;
+  my ($r, $res) = @_;
 
   git($r, remote => add       => heroku => $res->{git_url});
   git($r, push   => '--force' => heroku => 'master');
 
-  return @_, $r;
+  return $r;
 }
 
 sub git {
   return shift->run(@_);
+  #my $r = shift;
+  #`git --work-tree $r->work_tree --git-dir $r->git_dir @_`;
+  #warn('git --work-tree ' . $r->work_tree . ' --git-dir ' . $r->git_dir . " @_");
 }
 
-# T :: (A, $opt, $h) -> (A, $res)
 sub create_or_get_app {
-  my ($h, $opt) = map {pop} 1 .. 2;
+  my ($h, $opt) = @_;
 
   # Attempt create
   my $res = {$h->create(name => $opt->{name})};
@@ -184,24 +180,25 @@ sub create_or_get_app {
   $res = shift @{[grep $_->{name} eq $opt->{name} => $h->apps]}
     if $h->error and $h->error eq 'Name is already taken';
 
-  say "Upload failed for $opt->{name}: " . $error and exit if !$res;
+  print "Upload failed for $opt->{name}: " . $error . "\n" and exit if !$res;
 
-  return @_, $h, $res;
+  return $res;
 }
 
-# T :: (A, $config, $h, $res) -> (A, $h, $res)
 sub config_app {
-  my ($res, $h, $config) = map {pop} 1 .. 3;
+  my ($h, $res, $config) = @_;
 
-  say "Configuration failed for app $res->{name}: " . $h->error and exit
+  print "Configuration failed for app $res->{name}: " . $h->error . "\n"
+    and exit
     if !$h->add_config(name => $res->{name}, %$config);
 
-  return @_, $h, $res;
+  return $res;
 }
 
-# T :: (A, $h, $res) -> (A, $res)
 sub verify_app {
-  my ($res, $h) = map {pop} 1 .. 2;
+  my ($h, $res) = @_;
+
+  # This is the way Heroku's official command-line client does it.
 
   for (0 .. 5) {
     last if $h->app_created(name => $res->{name});
@@ -209,7 +206,7 @@ sub verify_app {
     print ' . ';
   }
 
-  return @_, $res;
+  return $res;
 }
 
 
@@ -238,13 +235,13 @@ L<Mojo::Command> and implements the following new ones.
 =head2 C<description>
 
   my $description = $deployment->description;
-  $cpanify        = $deployment->description(' Foo !');
+  $deployment     = $deployment->description(' Foo !');
 
 Short description of this command, used for the command list.
 
 =head2 C<usage>
 
-  my $usage = $deployment->usage;
+  my $usage    = $deployment->usage;
   $deployment  = $deployment->usage(' Foo !');
 
 Usage information for this command, used for the help screen.
@@ -256,7 +253,7 @@ and implements the following new ones.
 
 =head2 C<run>
 
-  $delpoyment->run(@ARGV);
+  $deployment->run(@ARGV);
 
 Run this command.
 

@@ -19,7 +19,7 @@ $|++;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
-has description      => "Deploy Mojolicious app.\n";
+has description      => "Deploy Mojolicious app to Heroku.\n";
 has opt              => sub { {} };
 has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
 has usage            => <<"EOF";
@@ -29,16 +29,13 @@ usage: $0 deploy heroku [OPTIONS]
   # Create new app with randomly selected name and deploy
   $0 deploy heroku -c
 
-  # Create new app with specified name and deploy
-  $0 deploy heroku -c -n happy-cloud-1234
-
-  # Deploy to existing app
-  $0 deploy heroku -n happy-cloud-1234
+  # Deploy to specified app and deploy (creates app if it does not exist)
+  $0 deploy heroku -n friggin-ponycorns
 
 These options are available:
-  -n, --appname <name>      Specify app for deployment
+  -n, --appname <name>      Specify app name for deployment
   -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
-  -c, --create              Create a new Heroku app
+  -c, --create              Create app with randomly selected name
   -v, --verbose             Verbose output (heroku response, git output)
   -h, --help                This message
 EOF
@@ -66,8 +63,9 @@ sub validate {
     if !defined $opt->{create} and !defined $opt->{name};
 
   # API Key
-  push @errors => 'API key not specified, and not found in '
-    . $self->credentials_file
+  push @errors => 'API key not specified, or not found in '
+    . $self->credentials_file . "\n"
+    . ' (Your API key can be found at https://api.heroku.com/account)'
     if !defined $opt->{api_key};
 
   return @errors;

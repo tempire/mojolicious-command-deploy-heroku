@@ -3,6 +3,7 @@ use Mojo::Base 'Mojo::Command';
 
 has description => qq/Generate "Heroku configuration".\n/;
 has usage       => "usage: $0 generate heroku\n";
+has file        => 'Perloku';
 
 sub run {
   my $self = shift;
@@ -13,8 +14,8 @@ sub run {
     ? $0
     : 'script/' . $self->class_to_file($class);
 
-  $self->render_to_rel_file(perloku => Perloku => $script_name);
-  $self->chmod_file('Perloku' => 0744);
+  $self->render_to_rel_file(perloku => $self->file => $script_name);
+  $self->chmod_file($self->file => 0744);
 }
 
 1;

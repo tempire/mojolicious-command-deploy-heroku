@@ -1,14 +1,16 @@
 package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojo::Command';
 
-use Data::Dumper;
 use File::Slurp 'slurp';
 use File::Spec;
+use IO::File;
 use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
 use Git::Repository;
 use IPC::Cmd 'can_run';
 use Mojo::IOLoop;
 use Mojo::UserAgent;
+use Mojolicious::Command::generate::heroku;
+use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
@@ -87,6 +89,9 @@ sub run {
   my @errors = $self->validate($opt);
   die "\n" . join("\n" => @errors) . "\n" . $self->usage if @errors;
 
+  $self->generate_makefile;
+  $self->generate_herokufile; 
+
   my $h = Net::Heroku->new(api_key => $opt->{api_key});
 
   # Create
@@ -110,6 +115,33 @@ sub run {
   );
 
   print "done.\n";
+}
+
+sub generate_makefile {
+  my $self = shift;
+
+  my $command = Mojolicious::Command::generate::makefile->new;
+  my $file = $self->app->home->rel_file('Makefile.PL');
+
+  if (!IO::File->new($file, 'r')) {
+    print "$file not found...generating\n";
+    return $command->run;
+  }
+
+  return;
+}
+
+sub generate_herokufile {
+  my $self = shift;
+
+  my $command = Mojolicious::Command::generate::heroku->new;
+
+  if (!IO::File->new($command->file, 'r')) {
+    print $command->file . " not found...generating\n";
+    return $command->run;
+  }
+
+  return;
 }
 
 sub api_key {
@@ -164,9 +196,6 @@ sub push_repo {
 
 sub git {
   return shift->run(@_);
-  #my $r = shift;
-  #`git --work-tree $r->work_tree --git-dir $r->git_dir @_`;
-  #warn('git --work-tree ' . $r->work_tree . ' --git-dir ' . $r->git_dir . " @_");
 }
 
 sub create_or_get_app {

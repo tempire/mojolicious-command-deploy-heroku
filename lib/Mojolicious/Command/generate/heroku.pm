@@ -23,7 +23,7 @@ __DATA__
 
 @@ perloku
 #!/bin/sh
-<%= shift %> daemon --listen http://*:$PORT --mode production
+./<%= shift %> daemon --listen http://*:$PORT --mode production
 
 __END__
 =head1 NAME

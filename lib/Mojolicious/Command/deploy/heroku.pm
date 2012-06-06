@@ -334,24 +334,11 @@ sub create_or_get_app {
   return $res;
 }
 
-sub upload_keys {
-  my $h = shift;
-
-  # Verify that remote keys match existing keys
-  my %keys = map { $_->{contents} => $_->{email} } $h->keys;
-  my $match = grep defined $keys{$_->all} => ssh_keys();
-
-  if (!$h->keys) {
-    print "\nHeroku does not have any SSH keys stored for you.\n";
-    $h->add_key(key => create_or_get_key());
-  }
-}
-
 sub remote_key_match {
   my $h = pop;
 
   my %remote_keys = map { $_->{contents} => $_->{email} } $h->keys;
-  my @local_keys = map substr($_, 0, -1) => ssh_keys();
+  my @local_keys = map substr(slurp($_), 0, -1) => ssh_keys();
 
   #my @local_keys = map substr($_->all, 0, -1) => ssh_keys();
 

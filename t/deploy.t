@@ -25,7 +25,6 @@ ok $o->can($_) for qw/
     run
     save_local_api_key
     ssh_keys
-    upload_keys
     validate
     verify_app
   /;

@@ -421,15 +421,15 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 =over 4
 
-=item 1 B<Heroku Service>
+=item 1) B<Heroku Service>
 
   L<https://api.heroku.com/signup>
 
-=item 2 B<Generate Mojolicious app>
+=item 2) B<Generate Mojolicious app>
 
   mojo generate lite_app hello
 
-=item 3 B<Deploy>
+=item 3) B<Deploy>
 
   ./hello deploy heroku --create
 

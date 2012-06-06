@@ -16,8 +16,8 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
     script/my_app deploy heroku --name happy-cloud-1234
 
   These options are available:
-    -n, --appname &lt;name&gt;      Specify app for deployment
-    -a, --api-key &lt;api_key&gt;   Heroku API key (read from ~/.heroku/credentials by default).
+    -n, --appname <name>      Specify app for deployment
+    -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
     -c, --create              Create a new Heroku app
     -v, --verbose             Verbose output (heroku response, git output)
     -h, --help                This message

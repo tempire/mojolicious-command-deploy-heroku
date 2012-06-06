@@ -423,7 +423,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 =item 1) B<Heroku Service>
 
-  L<https://api.heroku.com/signup>
+L<https://api.heroku.com/signup>
 
 =item 2) B<Generate Mojolicious app>
 

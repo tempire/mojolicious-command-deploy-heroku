@@ -398,10 +398,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
     # Create new app with randomly selected name and specified api key
     script/my_app deploy heroku --create --api-key 123412341234...
 
-    # Create new app with specified name and deploy
-    script/my_app deploy heroku --create --name happy-cloud-1234
-
-    # Deploy to existing app
+    # Deploy app (new or existing) with specified name
     script/my_app deploy heroku --name happy-cloud-1234
 
   These options are available:

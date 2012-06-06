@@ -12,7 +12,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -419,11 +419,13 @@ L<https://api.heroku.com/signup>
 
   ./hello deploy heroku --create
 
+The deploy command creates a git repository of the B<current directory's contents> in /tmp, and then pushes it to a remote heroku repository.
+
 =back
 
 =head1 SEE ALSO
 
-L<http://heroku.com/>, L<http://mojolicio.us>
+L<https://github.com/tempire/perloku>, L<http://heroku.com/>, L<http://mojolicio.us>
 
 =head1 SOURCE
 
@@ -431,7 +433,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 AUTHOR
 

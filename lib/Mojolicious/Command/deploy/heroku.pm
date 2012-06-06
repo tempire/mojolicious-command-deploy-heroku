@@ -1,9 +1,8 @@
 package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojo::Command';
 
-use File::Slurp 'slurp';
-use File::Spec;
-use IO::File;
+#use IO::All 'io';
+use File::Slurp qw/ slurp write_file /;
 use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
 use Git::Repository;
 use IPC::Cmd 'can_run';
@@ -13,11 +12,14 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
+our $VERSION = 0.02;
+
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
 has description      => "Deploy Mojolicious app to Heroku.\n";
 has opt              => sub { {} };
 has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
+has makefile         => 'Makefile.PL';
 has usage            => <<"EOF";
 
 
@@ -53,19 +55,19 @@ sub validate {
   my $self = shift;
   my $opt  = shift;
 
-  my @errors;
-
-  push @errors => 'git command not found' if !can_run('git');
+  my @errors =
+    map $_ . ' command not found' =>
+    grep !can_run($_) => qw/ git ssh ssh-keygen /;
 
   # Create or appname
   push @errors => '--create or --appname must be specified'
     if !defined $opt->{create} and !defined $opt->{name};
 
   # API Key
-  push @errors => 'API key not specified, or not found in '
-    . $self->credentials_file . "\n"
-    . ' (Your API key can be found at https://api.heroku.com/account)'
-    if !defined $opt->{api_key};
+  #push @errors => 'API key not specified, or not found in '
+  #  . $self->credentials_file . "\n"
+  #  . ' (Your API key can be found at https://api.heroku.com/account)'
+  #  if !defined $opt->{api_key};
 
   return @errors;
 }
@@ -80,19 +82,27 @@ sub run {
   $self->ua->app($class);
   my $home_dir = $self->ua->app->home->to_string;
 
-  # Options
+  # Command-line Options
   my $opt = $self->opt_spec(@_);
 
-  $opt->{api_key} //= $self->api_key;
+  # Net::Heroku
+  my $h = $self->heroku_object($opt->{api_key} || $self->local_api_key);
 
   # Validate
   my @errors = $self->validate($opt);
   die "\n" . join("\n" => @errors) . "\n" . $self->usage if @errors;
 
-  $self->generate_makefile;
-  $self->generate_herokufile; 
+  print "\n";
 
-  my $h = Net::Heroku->new(api_key => $opt->{api_key});
+  # Prepare
+  $self->generate_makefile;
+  $self->generate_herokufile;
+
+  # SSH key permissions
+  if (!remote_key_match($h)) {
+    print "\nHeroku does not have any SSH keys stored for you.";
+    $h->add_key(key => create_or_get_key());
+  }
 
   # Create
   my $res = verify_app(
@@ -105,7 +115,7 @@ sub run {
   );
 
   # Upload
-  print "Uploading $name to $res->{name}...";
+  print "\nUploading $name to $res->{name}...\n";
   push_repo(
     fill_repo(
       $self->create_repo($home_dir, $self->tmpdir),
@@ -113,22 +123,78 @@ sub run {
     ),
     $res
   );
+}
 
-  print "done.\n";
+sub prompt {
+  my ($message, @options) = @_;
+
+  print "\n$message\n";
+
+  for (my $i = 0; $i < @options; $i++) {
+    printf "\n%d) %s" => $i + 1, $options[$i];
+  }
+
+  print "\n\n> ";
+
+  my $response = <STDIN>;
+  chomp $response;
+
+  return ($response
+      && $response =~ /^\d+$/
+      && $response > 0
+      && $response < @options + 1)
+    ? $options[$response - 1]
+    : prompt($message, @options);
+}
+
+sub choose_key {
+  return prompt
+    "Which of the following keys would you like to use with Heroku?",
+    ssh_keys();
+}
+
+sub generate_key {
+  print "\nGenerating an SSH public key...\n";
+
+  my $file = "id_rsa";
+
+  # Get/create dir
+  #my $dir = io->dir("$ENV{HOME}/.ssh")->perms(0700)->mkdir;
+  my $dir = "$ENV{HOME}/.ssh";
+  mkdir $dir;
+  chmod 0700, $dir;
+
+  # Generate RSA key
+  `ssh-keygen -t rsa -N "" -f $dir/$file 2>&1`;
+
+  return "$dir/$file.pub";
+}
+
+sub ssh_keys {
+
+  #return grep /\.pub$/ => io->dir("$ENV{HOME}/.ssh/")->all;
+  opendir(my $dir => "$ENV{HOME}/.ssh/") or return;
+  return map "$ENV{HOME}/.ssh/$_" => grep /\.pub$/ => readdir($dir);
+}
+
+
+sub create_or_get_key {
+
+  #return io->file(ssh_keys() ? choose_key : generate_key)->slurp;
+  my $file = ssh_keys() ? choose_key : generate_key;
+  return slurp $file;
 }
 
 sub generate_makefile {
   my $self = shift;
 
   my $command = Mojolicious::Command::generate::makefile->new;
-  my $file = $self->app->home->rel_file('Makefile.PL');
+  my $file    = $self->app->home->rel_file($self->makefile);
 
-  if (!IO::File->new($file, 'r')) {
+  if (!file_exists($file)) {
     print "$file not found...generating\n";
     return $command->run;
   }
-
-  return;
 }
 
 sub generate_herokufile {
@@ -136,23 +202,76 @@ sub generate_herokufile {
 
   my $command = Mojolicious::Command::generate::heroku->new;
 
-  if (!IO::File->new($command->file, 'r')) {
+  if (!file_exists($command->file)) {
     print $command->file . " not found...generating\n";
     return $command->run;
   }
-
-  return;
 }
 
-sub api_key {
+sub file_exists {
+
+  #return io(shift)->exists;
+  return -e shift;
+}
+
+sub heroku_object {
+  my ($self, $api_key) = @_;
+
+  my $h;
+
+  if (defined $api_key) {
+    $h = Net::Heroku->new(api_key => $api_key);
+  }
+  else {
+    my @credentials;
+
+    while (!$h || $h->error) {
+      @credentials = prompt_user_pass();
+      $h           = Net::Heroku->new(@credentials);
+    }
+
+    $self->save_local_api_key($credentials[1], $h->ua->api_key);
+  }
+
+  return $h;
+}
+
+sub save_local_api_key {
+  my ($self, $email, $api_key) = @_;
+
+  #my $dir = io->dir("$ENV{HOME}/.heroku")->perms(0700)->mkdir;
+  my $dir = "$ENV{HOME}/.heroku";
+  mkdir $dir;
+  chmod 0700, $dir;
+
+  #return io("$dir/credentials")->print($email, "\n", $api_key, "\n");
+  return write_file "$dir/credentials", $email, "\n", $api_key, "\n";
+}
+
+sub local_api_key {
   my $self = shift;
 
   return if !-T $self->credentials_file;
 
+  #my $api_key = +(io->file($self->credentials_file)->slurp)[-1];
   my $api_key = +(slurp $self->credentials_file)[-1];
   chomp $api_key;
 
   return $api_key;
+}
+
+sub prompt_user_pass {
+  print "\nPlease enter your Heroku credentials";
+
+  print "\nEmail: ";
+  my $email = <STDIN>;
+  chomp $email;
+
+  print "Password: ";
+  my $password = <STDIN>;
+  chomp $password;
+
+  return (email => $email, password => $password);
 }
 
 sub create_repo {
@@ -202,8 +321,9 @@ sub create_or_get_app {
   my ($h, $opt) = @_;
 
   # Attempt create
-  my $res = {$h->create(name => $opt->{name})};
-  my $error = $h->error;
+  my %params = defined $opt->{name} ? (name => $opt->{name}) : ();
+  my $res    = {$h->create(%params)};
+  my $error  = $h->error;
 
   # Attempt retrieval
   $res = shift @{[grep $_->{name} eq $opt->{name} => $h->apps]}
@@ -212,6 +332,30 @@ sub create_or_get_app {
   print "Upload failed for $opt->{name}: " . $error . "\n" and exit if !$res;
 
   return $res;
+}
+
+sub upload_keys {
+  my $h = shift;
+
+  # Verify that remote keys match existing keys
+  my %keys = map { $_->{contents} => $_->{email} } $h->keys;
+  my $match = grep defined $keys{$_->all} => ssh_keys();
+
+  if (!$h->keys) {
+    print "\nHeroku does not have any SSH keys stored for you.\n";
+    $h->add_key(key => create_or_get_key());
+  }
+}
+
+sub remote_key_match {
+  my $h = pop;
+
+  my %remote_keys = map { $_->{contents} => $_->{email} } $h->keys;
+  my @local_keys = map substr($_, 0, -1) => ssh_keys();
+
+  #my @local_keys = map substr($_->all, 0, -1) => ssh_keys();
+
+  return grep defined $remote_keys{$_} => @local_keys;
 }
 
 sub config_app {
@@ -238,56 +382,69 @@ sub verify_app {
   return $res;
 }
 
-
 1;
 
 =head1 NAME
 
 Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
-=head1 SYNOPSIS
+=head1 USAGE
 
-  use Mojolicious::Command::deploy::heroku
+  script/my_app deploy heroku [OPTIONS]
 
-  my $deployment = Mojolicious::Command::deploy::heroku->new;
-  $deployment->run(@ARGV);
+    # Create new app with randomly selected name and deploy
+    script/my_app deploy heroku --create
+
+    # Create new app with randomly selected name and specified api key
+    script/my_app deploy heroku --create --api-key 123412341234...
+
+    # Create new app with specified name and deploy
+    script/my_app deploy heroku --create --name happy-cloud-1234
+
+    # Deploy to existing app
+    script/my_app deploy heroku --name happy-cloud-1234
+
+  These options are available:
+    -n, --appname &lt;name&gt;      Specify app for deployment
+    -a, --api-key &lt;api_key&gt;   Heroku API key (read from ~/.heroku/credentials by default).
+    -c, --create              Create a new Heroku app
+    -v, --verbose             Verbose output (heroku response, git output)
+    -h, --help                This message
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Command::deployment> deploys a Mojolicious app to Heroku.
+L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
-=head1 ATTRIBUTES
+*NOTE* Currently works only on *nix systems.
 
-L<Mojolicious::Command::deploy::heroku> inherits all attributes from
-L<Mojo::Command> and implements the following new ones.
+=head1 WORKFLOW
 
-=head2 C<description>
+=over 4
 
-  my $description = $deployment->description;
-  $deployment     = $deployment->description(' Foo !');
+=item * Heroku Service
 
-Short description of this command, used for the command list.
+L<https://api.heroku.com/signup>
 
-=head2 C<usage>
+=item * Generate Mojolicious app
 
-  my $usage    = $deployment->usage;
-  $deployment  = $deployment->usage(' Foo !');
+mojo generate lite_app hello
 
-Usage information for this command, used for the help screen.
+=item * Deploy
 
-=head1 METHODS
-
-L<Mojolicious::Command::deploy::heroku> inherits all methods from L<Mojo::Command>
-and implements the following new ones.
-
-=head2 C<run>
-
-  $deployment->run(@ARGV);
-
-Run this command.
+./hello deploy heroku --create
 
 =head1 SEE ALSO
 
-L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicio.us>.
+L<http://heroku.com/>, L<http://mojolicio.us>
 
-=cut
+=head1 SOURCE
+
+L<http://github.com/tempire/mojolicious-command-deploy-heroku>
+
+=head1 VERSION
+
+0.02
+
+=head1 AUTHOR
+
+Glen Hinkle C<tempire@cpan.org>

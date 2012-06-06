@@ -1,0 +1,14 @@
+This file documents the revision history for the Net::Heroku distribution.
+
+0.02    2012-06-05 00:00:00
+        - Prompts for credentials if api key not found
+          - Saves api key in ~/.heroku/credentials after retrieval
+        - SSH keys
+          - If no remote keys and no local keys, generates and uploads key
+          - If no remote keys but local keys, prompts to choose and uploads
+          - If remote keys but no local keys, generates and uploads key
+        - Fixed description
+        - POD with instructions
+
+0.01    2012-06-05 00:00:00
+        - Initial release

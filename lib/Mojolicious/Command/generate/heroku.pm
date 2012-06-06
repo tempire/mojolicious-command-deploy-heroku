@@ -1,7 +1,7 @@
 package Mojolicious::Command::generate::heroku;
 use Mojo::Base 'Mojo::Command';
 
-has description => qq/Generate "Heroku configuration".\n/;
+has description => qq/Generate Heroku configuration.\n/;
 has usage       => "usage: $0 generate heroku\n";
 has file        => 'Perloku';
 

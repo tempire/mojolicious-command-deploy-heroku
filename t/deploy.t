@@ -17,6 +17,9 @@ ok $o->can($_) for qw/
   run
   validate
   verify_app
+  ssh_keys
   /;
+
+$o->generate_ssh_keys;
 
 done_testing;

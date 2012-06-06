@@ -22,6 +22,7 @@ has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
 has makefile         => 'Makefile.PL';
 has usage            => <<"EOF";
 
+$| = 1;
 
 usage: $0 deploy heroku [OPTIONS]
 
@@ -85,14 +86,12 @@ sub run {
   # Command-line Options
   my $opt = $self->opt_spec(@_);
 
-  # Net::Heroku
-  my $h = $self->heroku_object($opt->{api_key} || $self->local_api_key);
-
   # Validate
   my @errors = $self->validate($opt);
   die "\n" . join("\n" => @errors) . "\n" . $self->usage if @errors;
 
-  print "\n";
+  # Net::Heroku
+  my $h = $self->heroku_object($opt->{api_key} || $self->local_api_key);
 
   # Prepare
   $self->generate_makefile;
@@ -101,7 +100,10 @@ sub run {
   # SSH key permissions
   if (!remote_key_match($h)) {
     print "\nHeroku does not have any SSH keys stored for you.";
-    $h->add_key(key => create_or_get_key());
+    my ($file, $key) = create_or_get_key();
+
+    print "\nUploading SSH public key $file\n";
+    $h->add_key(key => $key);
   }
 
   # Create
@@ -182,7 +184,7 @@ sub create_or_get_key {
 
   #return io->file(ssh_keys() ? choose_key : generate_key)->slurp;
   my $file = ssh_keys() ? choose_key : generate_key;
-  return slurp $file;
+  return $file, slurp $file;
 }
 
 sub generate_makefile {

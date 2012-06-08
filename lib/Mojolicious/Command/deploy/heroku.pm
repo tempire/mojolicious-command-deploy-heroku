@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -171,7 +171,9 @@ sub ssh_keys {
 
   #return grep /\.pub$/ => io->dir("$ENV{HOME}/.ssh/")->all;
   opendir(my $dir => File::Spec->catfile($ENV{HOME}, '.ssh')) or return;
-  return map File::Spec->catfile($ENV{HOME}, '.ssh', $_) => grep /\.pub$/ => readdir($dir);
+  return
+    map File::Spec->catfile($ENV{HOME}, '.ssh', $_) =>
+    grep /\.pub$/ => readdir($dir);
 }
 
 
@@ -273,7 +275,8 @@ sub prompt_user_pass {
 sub create_repo {
   my ($self, $home_dir, $tmp_dir) = @_;
 
-  my $git_dir = File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
+  my $git_dir =
+    File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
   make_path($git_dir);
 
   my $r = {
@@ -313,8 +316,9 @@ sub push_repo {
 }
 
 sub git {
-  my $r = shift;
-  my $cmd = "git --work-tree=\"$r->{work_tree}\" --git-dir=\"$r->{git_dir}\" " . join " " => @_;
+  my $r   = shift;
+  my $cmd = "git -c core.autocrlf=false --work-tree=\"$r->{work_tree}\" --git-dir=\"$r->{git_dir}\" "
+    . join " " => @_;
   return `$cmd`;
 }
 
@@ -432,7 +436,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 AUTHOR
 

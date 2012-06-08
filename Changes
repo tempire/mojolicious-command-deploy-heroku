@@ -1,5 +1,9 @@
 This file documents the revision history for the Net::Heroku distribution.
 
+0.04    2012-06-07 00:00:00
+        - Added git config option core.autocrlf=false to prevent ugly
+          warnings when pushing in windows
+
 0.03    2012-06-07 00:00:00
         - POD references to Perloku and git repo operation.
         - Works on Windows

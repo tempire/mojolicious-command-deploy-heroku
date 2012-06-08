@@ -26,7 +26,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
 L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
-*NOTE* Does not currently work on Windows systems.
+*NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
 =head1 WORKFLOW
 
@@ -42,7 +42,7 @@ L<https://api.heroku.com/signup>
 
 =item 3) B<Deploy>
 
-  ./hello deploy heroku --create
+  hello deploy heroku --create
 
 The deploy command creates a git repository of the B<current directory's contents> in /tmp, and then pushes it to a remote heroku repository.
 
@@ -63,3 +63,4 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 =head1 AUTHOR
 
 Glen Hinkle C<tempire@cpan.org>
+

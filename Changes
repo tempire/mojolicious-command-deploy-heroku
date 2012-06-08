@@ -1,7 +1,9 @@
 This file documents the revision history for the Net::Heroku distribution.
 
-0.03    2012-06-06 00:00:00
-        - POD references to windows, to Perloku and git repo operation.
+0.03    2012-06-07 00:00:00
+        - POD references to Perloku and git repo operation.
+        - Works on Windows
+        - Git/Heroku process prints out progress
 
 0.02    2012-06-05 00:00:00
         - Prompts for credentials if api key not found

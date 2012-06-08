@@ -163,7 +163,8 @@ sub generate_key {
 
   # Get/create dir
   #my $dir = io->dir("$ENV{HOME}/.ssh")->perms(0700)->mkdir;
-  my $dir = make_path("$ENV{HOME}/.ssh", {mode => 0700});
+  my $dir = "$ENV{HOME}/.ssh";
+  make_path($dir, {mode => 0700});
 
   # Generate RSA key
   `ssh-keygen -t rsa -N "" -f $dir/$file 2>&1`;

@@ -5,7 +5,7 @@ use Mojo::Base 'Mojo::Command';
 use File::Path 'make_path';
 use File::Slurp qw/ slurp write_file /;
 use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
-use Git::Repository;
+#use Git::Repository;
 use IPC::Cmd 'can_run';
 use Mojo::IOLoop;
 use Mojo::UserAgent;
@@ -290,12 +290,12 @@ sub create_repo {
 
   return $r;
 
-  Git::Repository->run(init => $git_dir);
+  #Git::Repository->run(init => $git_dir);
 
-  return Git::Repository->new(
-    work_tree => $home_dir,
-    git_dir   => $git_dir . '/.git'
-  );
+  #return Git::Repository->new(
+  #  work_tree => $home_dir,
+  #  git_dir   => $git_dir . '/.git'
+  #);
 }
 
 sub fill_repo {

@@ -26,7 +26,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
 L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
-*NOTE* Currently works only on *nix systems.
+*NOTE* Does not currently work on Windows systems.
 
 =head1 WORKFLOW
 

@@ -167,9 +167,11 @@ sub generate_key {
   make_path($dir, {mode => 0700});
 
   # Generate RSA key
-  `ssh-keygen -t rsa -N "" -f $dir/$file 2>&1`;
+  my $path = File::Spec->catfile($dir, $file);
 
-  return "$dir/$file.pub";
+  `ssh-keygen -t rsa -N "" -f $path 2>&1`;
+
+  return "$path.pub";
 }
 
 sub ssh_keys {

@@ -2,6 +2,7 @@ package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojo::Command';
 
 #use IO::All 'io';
+use File::Path 'make_path';
 use File::Slurp qw/ slurp write_file /;
 use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
 use Git::Repository;
@@ -162,9 +163,7 @@ sub generate_key {
 
   # Get/create dir
   #my $dir = io->dir("$ENV{HOME}/.ssh")->perms(0700)->mkdir;
-  my $dir = "$ENV{HOME}/.ssh";
-  mkdir $dir;
-  chmod 0700, $dir;
+  my $dir = make_path("$ENV{HOME}/.ssh", {mode => 0700});
 
   # Generate RSA key
   `ssh-keygen -t rsa -N "" -f $dir/$file 2>&1`;
@@ -243,8 +242,7 @@ sub save_local_api_key {
 
   #my $dir = io->dir("$ENV{HOME}/.heroku")->perms(0700)->mkdir;
   my $dir = "$ENV{HOME}/.heroku";
-  mkdir $dir;
-  chmod 0700, $dir;
+  make_path($dir, {mode => 0700});
 
   #return io("$dir/credentials")->print($email, "\n", $api_key, "\n");
   return write_file "$dir/credentials", $email, "\n", $api_key, "\n";
@@ -281,6 +279,17 @@ sub create_repo {
 
   my $git_dir = $tmp_dir . '/mojo_deploy_git_' . int rand 1000;
 
+  make_path $git_dir;
+
+  my $r = {
+    work_tree => $home_dir,
+    git_dir   => $git_dir . '/.git'
+  };
+
+  git($r, 'init');
+
+  return $r;
+
   Git::Repository->run(init => $git_dir);
 
   return Git::Repository->new(
@@ -316,7 +325,10 @@ sub push_repo {
 }
 
 sub git {
-  return shift->run(@_);
+  my $r = shift;
+  my $cmd = "git --work-tree=$r->{work_tree} --git-dir=$r->{git_dir} " . join " " => @_;;
+  return `$cmd`;
+  #return shift->run(@_);
 }
 
 sub create_or_get_app {
@@ -401,7 +413,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
 L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
-*NOTE* Currently works only on *nix systems.
+*NOTE* Does not currently work on Windows systems.
 
 =head1 WORKFLOW
 

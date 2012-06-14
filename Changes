@@ -1,5 +1,8 @@
 This file documents the revision history for the Net::Heroku distribution.
 
+0.05    2012-06-14 00:00:00
+        - Prints each file added to repo, with total count
+
 0.04    2012-06-07 00:00:00
         - Added git config option core.autocrlf=false to prevent ugly
           warnings when pushing in windows

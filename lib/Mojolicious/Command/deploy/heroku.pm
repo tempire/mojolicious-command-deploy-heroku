@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -112,7 +112,6 @@ sub run {
   );
 
   # Upload
-  print "\nUploading $name to $res->{name}...\n";
   push_repo(
     fill_repo(
       $self->create_repo($home_dir, $self->tmpdir),
@@ -290,18 +289,22 @@ sub create_repo {
 }
 
 sub fill_repo {
-  my ($r, $files) = @_;
+  my ($r, $all_files) = @_;
 
-  # Files matched by .gitignore
+  # .gitignore'd files
   my @ignore =
     git($r, 'ls-files' => '--others' => '-i' => '--exclude-standard');
 
+  my @files =
+    grep { my $file = $_; $file if !grep $file =~ /$_\W*/ => @ignore }
+    @$all_files;
+
   # Add files filtered by .gitignore
-  git($r,
-    add => grep { my $file = $_; $file if !grep $file =~ /$_\W*/ => @ignore }
-      @$files);
+  print "Adding file $_\n" for @files;
+  git($r, add => @files);
 
   git($r, commit => '-m' => '"Initial commit"');
+  print int(@files) . " files added\n\n";
 
   return $r;
 }
@@ -316,8 +319,9 @@ sub push_repo {
 }
 
 sub git {
-  my $r   = shift;
-  my $cmd = "git -c core.autocrlf=false --work-tree=\"$r->{work_tree}\" --git-dir=\"$r->{git_dir}\" "
+  my $r = shift;
+  my $cmd =
+    "git -c core.autocrlf=false --work-tree=\"$r->{work_tree}\" --git-dir=\"$r->{git_dir}\" "
     . join " " => @_;
   return `$cmd`;
 }
@@ -436,7 +440,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 AUTHOR
 

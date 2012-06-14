@@ -111,6 +111,10 @@ sub run {
     )
   );
 
+  print "Collecting all files in "
+    . $self->app->home . " ..."
+    . " (Ctrl-C to cancel)\n";
+
   # Upload
   push_repo(
     fill_repo(

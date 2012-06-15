@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="mojo deploy heroku : One-step deployment of Mojolicious apps" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>mojo deploy heroku</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tempire/mojolicious-command-deploy-heroku">View on GitHub</a>
+
+          <h1 id="project_title">mojo deploy heroku</h1>
+          <h2 id="project_tagline">One-step deployment of Mojolicious apps</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/tempire/mojolicious-command-deploy-heroku/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/tempire/mojolicious-command-deploy-heroku/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h4>Install</h4>
+
+<pre><code>curl -L cpanmin.us | perl - Mojolicious::Command::deploy::heroku
+</code></pre>
+
+<p><br></p>
+
+<h4>Workflow</h4>
+
+<ol>
+<li>
+<p>Sign up with Heroku</p>
+
+<pre><code>https://api.heroku.com/signup
+</code></pre>
+</li>
+<li>
+<p>Generate Mojolicious app</p>
+
+<pre><code>mojo generate lite_app hello
+</code></pre>
+</li>
+<li>
+<p>Deploy</p>
+
+<pre><code>hello deploy heroku --create
+</code></pre>
+</li>
+</ol><p><br></p>
+
+<h4>Usage</h4>
+
+<pre><code>script/my_app deploy heroku [OPTIONS]
+</code></pre>
+
+<p><br>
+Create new app with randomly selected name and deploy</p>
+
+<pre><code>script/my_app deploy heroku --create
+</code></pre>
+
+<p><br>
+Create new app with randomly selected name and specified api key</p>
+
+<pre><code>script/my_app deploy heroku --create --api-key 123412341234...
+</code></pre>
+
+<p><br>
+Deploy app (new or existing) with specified name</p>
+
+<pre><code>script/my_app deploy heroku --name happy-cloud-1234
+</code></pre>
+
+<p><br>
+These options are available:</p>
+
+<pre><code>-n, --appname &lt;name&gt;      Specify app for deployment
+-a, --api-key &lt;api_key&gt;   Heroku API key (read from ~/.heroku/credentials by default).
+-c, --create              Create a new Heroku app
+-v, --verbose             Verbose output (heroku response, git output)
+-h, --help                This message
+</code></pre>
+
+<p><em>NOTE</em> The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.</p>
+
+<p>The deploy command creates a git repository of the current directory's contents in /tmp, and then pushes it to a remote heroku repository.</p>
+
+<p><br></p>
+
+<h4>Source</h4>
+
+<p><a href="http://github.com/tempire/mojolicious-command-deploy-heroku">http://github.com/tempire/mojolicious-command-deploy-heroku</a></p>
+
+<h4>Version</h4>
+
+<p>0.05</p>
+
+<h4>Author</h4>
+
+<p>Glen Hinkle <a href="http://twitter.com/tempire">@tempire</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">mojo deploy heroku maintained by <a href="https://github.com/tempire">tempire</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-32630253-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>

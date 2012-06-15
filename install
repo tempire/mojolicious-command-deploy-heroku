@@ -1,0 +1,2 @@
+perl -kL cpanmin.us | perl - -n Mojolicious::Command::deploy::heroku
+#curl -L http://git.io/mojoheroku/install | sh

@@ -158,7 +158,7 @@ img {
   -ms-box-shadow: 0 0 5px #ebebeb;
 }
 
-header.inner img {
+footer.inner img, header.inner img {
   border: 0;
   width: inherit;
   margin: -30px 0 0px;
@@ -172,6 +172,34 @@ header.inner img {
 header.inner h2 {
   margin: 0;
   padding: 0;
+}
+
+ul.contact {
+  padding: 0;
+  margin: 10px auto 0;
+  text-align: center;
+}
+ul.contact > li {
+  color: #A9A9A9;
+  display: inline;
+  font-size: 0.9em;
+}
+ul.contact > li:before {
+  content: '|';
+  padding-right: 5px;
+}
+ul.contact > li:first-child:before {
+  content: none; 
+}
+
+footer.inner li {
+  padding: 0;
+}
+
+a.mojolicious-logo {
+  display: block;
+  margin: 50px auto 0;
+  text-align: center;
 }
 
 pre, code {

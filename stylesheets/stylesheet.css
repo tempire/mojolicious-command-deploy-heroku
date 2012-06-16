@@ -202,6 +202,10 @@ a.mojolicious-logo {
   text-align: center;
 }
 
+p.hooray-guy {
+  text-align: right;
+}
+
 pre, code {
   width: 100%;
   color: #222;

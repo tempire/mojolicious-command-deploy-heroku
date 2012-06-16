@@ -144,6 +144,11 @@ strong {
 }
 
 img {
+  /*width: 100%;*/
+  /*max-width: 100%;*/
+}
+
+img! {
   position: relative;
   margin: 0 auto;
   max-width: 739px;
@@ -162,11 +167,11 @@ footer.inner img, header.inner img {
   border: 0;
   width: inherit;
   margin: -30px 0 0px;
-  -webkit-box-shadow: inherit;
-  box-shadow: inherit;
-  -moz-box-shadow: inherit;
-  -o-box-shadow: inherit;
-  -ms-box-shadow: inherit;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
 }
 
 header.inner h2 {
@@ -196,7 +201,7 @@ footer.inner li {
   padding: 0;
 }
 
-a.mojolicious-logo {
+a.mojolicious-logo, a.perl-raptor {
   display: block;
   margin: 50px auto 0;
   text-align: center;
@@ -303,11 +308,6 @@ td {
 form {
   background: #f2f2f2;
   padding: 20px;
-}
-
-img {
-  width: 100%;
-  max-width: 100%;
 }
 
 /*******************************************************************************

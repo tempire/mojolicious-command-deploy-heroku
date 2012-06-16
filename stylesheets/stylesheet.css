@@ -158,6 +158,22 @@ img {
   -ms-box-shadow: 0 0 5px #ebebeb;
 }
 
+header.inner img {
+  border: 0;
+  width: inherit;
+  margin: -30px 0 0px;
+  -webkit-box-shadow: inherit;
+  box-shadow: inherit;
+  -moz-box-shadow: inherit;
+  -o-box-shadow: inherit;
+  -ms-box-shadow: inherit;
+}
+
+header.inner h2 {
+  margin: 0;
+  padding: 0;
+}
+
 pre, code {
   width: 100%;
   color: #222;

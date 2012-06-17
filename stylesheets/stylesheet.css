@@ -39,6 +39,10 @@ ol, ul {
   list-style: none;
 }
 
+ol li {
+  margin-top: 20px;
+}
+
 blockquote, q {
 }
 

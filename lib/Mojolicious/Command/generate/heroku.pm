@@ -1,5 +1,5 @@
 package Mojolicious::Command::generate::heroku;
-use Mojo::Base 'Mojo::Command';
+use Mojo::Base 'Mojolicious::Command';
 
 has description => qq/Generate Heroku configuration.\n/;
 has usage       => "usage: $0 generate heroku\n";

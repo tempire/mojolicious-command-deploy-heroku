@@ -1,5 +1,5 @@
 package Mojolicious::Command::deploy::heroku;
-use Mojo::Base 'Mojo::Command';
+use Mojo::Base 'Mojolicious::Command';
 
 #use IO::All 'io';
 use File::Path 'make_path';
@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -444,7 +444,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.05
+0.06
 
 =head1 AUTHOR
 

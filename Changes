@@ -1,5 +1,9 @@
 This file documents the revision history for the Net::Heroku distribution.
 
+0.06    2012-06-28 00:00:00
+        - Inherits Mojolicious::Command instead of Mojo::Command, as necessary
+          starting with Mojolicious 3.0
+
 0.05    2012-06-14 00:00:00
         - Prints each file added to repo, with total count
 

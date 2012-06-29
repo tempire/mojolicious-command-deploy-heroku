@@ -28,6 +28,8 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 *NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
+*NOTE* This release works with Mojolicious versions 3.0 and above.  For older Mojolicious versions, use the previous version, 0.05
+
 =head1 WORKFLOW
 
 =over 4

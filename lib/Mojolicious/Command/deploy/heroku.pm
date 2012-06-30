@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -22,8 +22,6 @@ has opt              => sub { {} };
 has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
 has makefile         => 'Makefile.PL';
 has usage            => <<"EOF";
-
-$| = 1;
 
 usage: $0 deploy heroku [OPTIONS]
 
@@ -446,7 +444,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.06
+0.07
 
 =head1 AUTHOR
 

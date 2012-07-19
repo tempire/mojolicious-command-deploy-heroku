@@ -60,7 +60,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.07
+0.08
 
 =head1 AUTHOR
 

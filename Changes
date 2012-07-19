@@ -1,5 +1,8 @@
 This file documents the revision history for the Net::Heroku distribution.
 
+0.08    2012-07-18 00:00:00
+        - Added help text displaying signup url when prompting for credentials
+
 0.07    2012-06-30 00:00:00
         - Fixed help typo
 

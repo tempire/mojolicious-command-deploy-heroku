@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -261,8 +261,9 @@ sub local_api_key {
 
 sub prompt_user_pass {
   print "\nPlease enter your Heroku credentials";
+  print "\n  (Sign up for free at https://api.heroku.com/signup)";
 
-  print "\nEmail: ";
+  print "\n\nEmail: ";
   my $email = <STDIN>;
   chomp $email;
 
@@ -444,7 +445,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.07
+0.08
 
 =head1 AUTHOR
 

@@ -1,5 +1,6 @@
 package Mojolicious::Command::generate::heroku;
 use Mojo::Base 'Mojolicious::Command';
+use Mojo::Util 'class_to_file';
 
 has description => qq/Generate Heroku configuration.\n/;
 has usage       => "usage: $0 generate heroku\n";
@@ -12,7 +13,7 @@ sub run {
   my $script_name =
     ref $class eq 'Mojolicious::Lite'
     ? $0
-    : 'script/' . $self->class_to_file($class);
+    : 'script/' . class_to_file($class);
 
   $self->render_to_rel_file(perloku => $self->file => $script_name);
   $self->chmod_file($self->file => 0744);

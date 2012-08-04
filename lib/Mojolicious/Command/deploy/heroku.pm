@@ -13,7 +13,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -413,7 +413,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 *NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
-*NOTE* This release works with Mojolicious versions 3.0 and above.  For older Mojolicious versions, use the previous version, 0.05
+*NOTE* This release works with Mojolicious versions 3.0 and above.  For older Mojolicious versions, please use 0.05 or before.
 
 =head1 WORKFLOW
 
@@ -448,7 +448,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.08
+0.09
 
 =head1 AUTHOR
 

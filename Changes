@@ -1,5 +1,10 @@
 This file documents the revision history for the Net::Heroku distribution.
 
+0.09    2012-08-03 00:00:00
+        - Fix generate heroku for full apps by switching to Mojo::Util->class_to_file
+          (was not working since v0.06 with Mojolicious 3.0+)
+        - Require Mojolicious 3.0
+
 0.08    2012-07-18 00:00:00
         - Added help text displaying signup url when prompting for credentials
 

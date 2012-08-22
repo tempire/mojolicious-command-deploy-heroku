@@ -68,12 +68,9 @@ sub validate {
 
 sub run {
   my $self = shift;
-  my $class = $ENV{MOJO_APP} || 'MyApp';
-  my $name =
-    ref $class eq 'Mojolicious::Lite' ? +($0 =~ /^\W*(.+)$/)[0] : $class;
 
   # App home dir
-  $self->ua->app($class);
+  $self->ua->app($self->app);
   my $home_dir = $self->ua->app->home->to_string;
 
   # Command-line Options

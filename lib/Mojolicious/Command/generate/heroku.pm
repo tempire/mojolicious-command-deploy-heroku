@@ -7,11 +7,11 @@ has usage       => "usage: $0 generate heroku\n";
 has file        => 'Perloku';
 
 sub run {
-  my $self = shift;
-  my $class = $ENV{MOJO_APP} || 'MyApp';
+  my $self  = shift;
+  my $class = ref $self->app;
 
   my $script_name =
-    ref $class eq 'Mojolicious::Lite'
+      $class eq 'Mojolicious::Lite'
     ? $0
     : 'script/' . class_to_file($class);
 
@@ -24,7 +24,7 @@ __DATA__
 
 @@ perloku
 #!/bin/sh
-./<%= shift %> daemon --listen http://*:$PORT --mode production
+./<%= +(shift =~ qr|[\./]*(.+)|)[0] %> daemon --listen http://*:$PORT --mode production
 
 __END__
 =head1 NAME

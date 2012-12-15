@@ -332,16 +332,17 @@ Full-Width Styles
 #forkme_banner {
   display: block;
   position: absolute;
-  top:0;
-  right: 75px;
+  top: 0;
+  right: 0;
   z-index: 10;
-  padding: 10px 50px 10px 10px;
+  padding: 14px 50px 6px 10px;
   color: #fff;
-  background: url('../images/blacktocat.png') #0090ff no-repeat 95% 50%;
+  background: url('../images/blacktocat.png') #000 no-repeat 80% 50%;
   font-weight: 700;
   box-shadow: 0 0 10px rgba(0,0,0,.5);
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
+  width: 54px;
 }
 
 #cpan {
@@ -351,12 +352,49 @@ Full-Width Styles
   right: 0px;
   z-index: 10;
   padding: 10px 10px 10px 10px;
-  background-color: #0090FF;
+  background-color: #6b5baf;
   color: #fff;
   font-weight: 700;
   box-shadow: 0 0 10px rgba(0,0,0,.5);
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
+}
+
+#mojolicious {
+  display: block;
+  position: absolute;
+  top:0;
+  right: -40px;
+  z-index: 10;
+  padding: 10px 10px 10px 10px;
+  background-color: #6b5baf;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0,0,0,.5);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  /*background: url('../images/mojo cloud.png') #6b5baf no-repeat 95% 50%;*/
+}
+
+#perl5 {
+  display: block;
+  position: absolute;
+  top:0;
+  right: -85px;
+  z-index: 10;
+  padding: 10px 10px 10px 10px;
+  /*background-color: #6b5baf;*/
+  background-color: #000;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0,0,0,.5);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  width: 70px;
+  background: url('../images/small perl5.png') #000 no-repeat 52% 50%;
+}
+#perl5 .version {
+  color: #eb4f02;
 }
 
 #header_wrap {
@@ -380,13 +418,55 @@ Full-Width Styles
   text-shadow: #111 0px 0px 10px;
 }
 
+#header_wrap {
+  position: relative;
+  height: 260px;
+}
+
+#deploy_logo {
+  display: block;
+  margin: -20px auto -5px auto;
+}
+
 #project_tagline {
+  position: absolute;
+  left: 0;
   color: #fff;
-  font-size: 24px;
   font-weight: 300;
   background: none;
   text-shadow: #111 0px 0px 10px;
+  width: 100%;
+  text-align: center;
 }
+#project_tagline:after {
+  left: 0;
+  color: #a19fb0;
+  width: 100%;
+  -webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
+  content: 'Deploy Mojolicious to Heroku';
+  position: absolute;
+}
+
+#project_subtagline {
+  color: #a292ff;
+  background: none;
+  width: 100%;
+  position: absolute;
+  text-align: center;
+  bottom: -50px;
+  left: 0;
+  font-size: 27px;
+}
+#project_subtagline:after {
+  color: #6b5baf;
+  content: "perl to the cloud in one step";
+  -webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
+  left: 0;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+
 
 #downloads {
   position: absolute;

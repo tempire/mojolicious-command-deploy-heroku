@@ -192,6 +192,10 @@ sub generate_makefile {
     print "$file not found...generating\n";
     return $command->run;
   }
+
+  unless ( `$^X -c $file` =~ /syntax OK/ ) {
+    die "$file does not compile. Cannot continue.\n";
+  }
 }
 
 sub generate_herokufile {

@@ -2,6 +2,7 @@ package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojolicious::Command';
 
 #use IO::All 'io';
+use IO::Prompter;
 use File::Path 'make_path';
 use File::Slurp qw/ slurp write_file /;
 use File::Spec;
@@ -260,12 +261,11 @@ sub prompt_user_pass {
   print "\nPlease enter your Heroku credentials";
   print "\n  (Sign up for free at https://api.heroku.com/signup)";
 
-  print "\n\nEmail: ";
-  my $email = <STDIN>;
+  print "\n\n"";
+  my $email = prompt 'Email:';
   chomp $email;
 
-  print "Password: ";
-  my $password = <STDIN>;
+  my $password = prompt 'Password:', -echo => '*';
   chomp $password;
 
   return (email => $email, password => $password);

@@ -1,3 +1,5 @@
+=pod
+
 =head1 NAME
 
 Mojolicious::Command::deploy::heroku - Deploy to Heroku
@@ -69,3 +71,4 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 Glen Hinkle C<tempire@cpan.org>
 
+=cut

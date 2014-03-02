@@ -70,8 +70,8 @@ sub run {
   my $self = shift;
 
   # App home dir
-  $self->ua->app($self->app);
-  my $home_dir = $self->ua->app->home->to_string;
+  $self->ua->server->app($self->app);
+  my $home_dir = $self->ua->server->app->home->to_string;
 
   # Command-line Options
   my $opt = $self->opt_spec(@_);

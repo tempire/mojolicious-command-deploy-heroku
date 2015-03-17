@@ -193,6 +193,10 @@ sub generate_makefile {
     print "$file not found...generating\n";
     return $command->run;
   }
+
+  unless ( `$^X -c $file` =~ /syntax OK/ ) {
+    die "$file does not compile. Cannot continue.\n";
+  }
 }
 
 sub generate_herokufile {
@@ -274,6 +278,7 @@ sub prompt_user_pass {
 sub create_repo {
   my ($self, $home_dir, $tmp_dir) = @_;
 
+  print "Creating git repo\n";
   my $git_dir =
     File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
   make_path($git_dir);
@@ -312,6 +317,7 @@ sub fill_repo {
 sub push_repo {
   my ($r, $res) = @_;
 
+  print "Pushing git repo\n";
   git($r, remote => add       => heroku => $res->{git_url});
   git($r, push   => '--force' => heroku => 'master');
 

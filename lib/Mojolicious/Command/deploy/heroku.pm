@@ -2,6 +2,7 @@ package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojolicious::Command';
 
 #use IO::All 'io';
+use IO::Prompter;
 use File::Path 'make_path';
 use File::Slurp qw/ slurp write_file /;
 use File::Spec;
@@ -120,7 +121,7 @@ sub run {
   );
 }
 
-sub prompt {
+sub promptopt {
   my ($message, @options) = @_;
 
   print "\n$message\n";
@@ -139,11 +140,11 @@ sub prompt {
       && $response > 0
       && $response < @options + 1)
     ? $options[$response - 1]
-    : prompt($message, @options);
+    : promptopt($message, @options);
 }
 
 sub choose_key {
-  return prompt
+  return promptopt
     "Which of the following keys would you like to use with Heroku?",
     ssh_keys();
 }
@@ -260,12 +261,11 @@ sub prompt_user_pass {
   print "\nPlease enter your Heroku credentials";
   print "\n  (Sign up for free at https://api.heroku.com/signup)";
 
-  print "\n\nEmail: ";
-  my $email = <STDIN>;
+  print "\n\n";
+  my $email = prompt('Email:', -stdio);
   chomp $email;
 
-  print "Password: ";
-  my $password = <STDIN>;
+  my $password = prompt('Password:', -echo=>'*', -stdio);
   chomp $password;
 
   return (email => $email, password => $password);
@@ -450,4 +450,3 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 =head1 AUTHOR
 
 Glen Hinkle C<tempire@cpan.org>
-

@@ -65,10 +65,16 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.11
+0.22
 
 =head1 AUTHOR
 
 Glen Hinkle C<tempire@cpan.org>
+
+=head1 CONTRIBUTORS
+
+MattOates
+
+briandfoy
 
 =cut

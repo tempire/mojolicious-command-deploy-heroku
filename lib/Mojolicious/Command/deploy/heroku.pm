@@ -352,10 +352,8 @@ sub create_or_get_app {
 sub remote_key_match {
   my $h = pop;
 
-  my %remote_keys = map { $_->{contents} => $_->{email} } $h->keys;
+  my %remote_keys = map { $_->{public_key} => $_->{email} } $h->keys;
   my @local_keys = map substr(slurp($_), 0, -1) => ssh_keys();
-
-  #my @local_keys = map substr($_->all, 0, -1) => ssh_keys();
 
   return grep defined $remote_keys{$_} => @local_keys;
 }

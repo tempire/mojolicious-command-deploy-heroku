@@ -115,7 +115,7 @@ sub run {
   push_repo(
     fill_repo(
       $self->create_repo($home_dir, $self->tmpdir),
-      $self->app->home->list_files
+      $self->app->home->list
     ),
     $res
   );

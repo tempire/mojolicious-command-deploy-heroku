@@ -1,26 +1,28 @@
 package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojolicious::Command';
 
-#use IO::All 'io';
 use IO::Prompter;
-use File::Path 'make_path';
-use File::Slurp qw/ slurp write_file /;
+# use File::Path 'make_path';
+# use File::Slurp qw/ slurp write_file /;
 use File::Spec;
+use Mojo::File;
 use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
 use IPC::Cmd 'can_run';
+use Net::Netrc;
 use Mojo::IOLoop;
 use Mojo::UserAgent;
 use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.13;
+our $VERSION = 0.20;
 
-has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
-has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
+has tmpdir           => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
+has ua               => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
 has description      => "Deploy Mojolicious app to Heroku.\n";
 has opt              => sub { {} };
-has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
+#has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
+has credentials_file => sub { "$ENV{HOME}/.netrc" };
 has makefile         => 'Makefile.PL';
 has usage            => <<"EOF";
 
@@ -46,9 +48,10 @@ sub opt_spec {
 
   return $opt
     if GetOptions(
-    "appname|n=s" => sub { $opt->{name}    = pop },
-    "api-key|a=s" => sub { $opt->{api_key} = pop },
-    "create|c"    => sub { $opt->{create}  = pop },
+      "appname|n=s" => sub { $opt->{name}    = pop },
+      "api-key|a=s" => sub { $opt->{api_key} = pop },
+      "create|c"    => sub { $opt->{create}  = pop },
+      "verbose|v"   => sub { $opt->{verbose} = pop },
     );
 }
 
@@ -56,9 +59,11 @@ sub validate {
   my $self = shift;
   my $opt  = shift;
 
-  my @errors =
-    map $_ . ' command not found' =>
-    grep !can_run($_) => qw/ git ssh ssh-keygen /;
+  my @errors = map {
+    $_ . ' command not found'
+  } grep {
+    !can_run($_)
+  } qw/ git ssh ssh-keygen /;
 
   # Create or appname
   push @errors => '--create or --appname must be specified'
@@ -103,7 +108,7 @@ sub run {
     config_app(
       $h,
       create_or_get_app($h, $opt),
-      {BUILDPACK_URL => 'http://github.com/tempire/perloku.git'}
+      { BUILDPACK_URL => 'http://github.com/tempire/perloku.git' }
     )
   );
 
@@ -152,35 +157,24 @@ sub choose_key {
 sub generate_key {
   print "\nGenerating an SSH public key...\n";
 
-  my $file = "id_rsa";
-
-  # Get/create dir
-  #my $dir = io->dir("$ENV{HOME}/.ssh")->perms(0700)->mkdir;
-  my $dir = File::Spec->catfile($ENV{HOME}, '.ssh');
-  make_path($dir, {mode => 0700});
-
   # Generate RSA key
-  my $path = File::Spec->catfile($dir, $file);
-  `ssh-keygen -t rsa -N "" -f "$path" 2>&1`;
+  my $path = Mojo::File->new($ENV{HOME}, '.ssh')
+    ->make_path({mode => 0700 })
+    ->child('id_rsa_test');
 
-  return "$path.pub";
+  my $exit = system('ssh-keygen', '-t', 'rsa', '-N', '', '-f', $path);
+
+  return $path . '.pub';
 }
 
 sub ssh_keys {
-
-  #return grep /\.pub$/ => io->dir("$ENV{HOME}/.ssh/")->all;
-  opendir(my $dir => File::Spec->catfile($ENV{HOME}, '.ssh')) or return;
-  return
-    map File::Spec->catfile($ENV{HOME}, '.ssh', $_) =>
-    grep /\.pub$/ => readdir($dir);
+  return Mojo::File->new($ENV{HOME}, '.ssh')->list->grep(qr/\.pub$/)->each;
 }
 
 
 sub create_or_get_key {
-
-  #return io->file(ssh_keys() ? choose_key : generate_key)->slurp;
-  my $file = ssh_keys() ? choose_key : generate_key;
-  return $file, slurp $file;
+  my $file = Mojo::File->new(ssh_keys() ? choose_key : generate_key);
+  return $file, $file->slurp;
 }
 
 sub generate_makefile {
@@ -190,12 +184,12 @@ sub generate_makefile {
   my $file    = $self->app->home->rel_file($self->makefile);
 
   if (!file_exists($file)) {
-    print "$file not found...generating\n";
+    print "$file not found.  Generating...\n";
     return $command->run;
   }
 
-  unless ( `$^X -c $file` =~ /syntax OK/ ) {
-    die "$file does not compile. Cannot continue.\n";
+  unless (qx/$^X -c $file/ =~ /syntax OK/) {
+    die "$file does not compile. Cannot continue.";
   }
 }
 
@@ -205,14 +199,12 @@ sub generate_herokufile {
   my $command = Mojolicious::Command::generate::heroku->new;
 
   if (!file_exists($command->file)) {
-    print $command->file . " not found...generating\n";
+    print $command->file . " not found.  Generating...\n";
     return $command->run;
   }
 }
 
 sub file_exists {
-
-  #return io(shift)->exists;
   return -e shift;
 }
 
@@ -241,22 +233,30 @@ sub heroku_object {
 sub save_local_api_key {
   my ($self, $email, $api_key) = @_;
 
-  #my $dir = io->dir("$ENV{HOME}/.heroku")->perms(0700)->mkdir;
-  my $dir = "$ENV{HOME}/.heroku";
-  make_path($dir, {mode => 0700});
+  my $path = Mojo::File->new($credentials_file);
+  my $exists = file_exists $path;
 
-  #return io("$dir/credentials")->print($email, "\n", $api_key, "\n");
-  return write_file "$dir/credentials", $email, "\n", $api_key, "\n";
+  $path->spurt(
+    -T $path ? $path->slurp : '',
+    "machine api.heroku.com\n",
+    "  password $api_key\n",
+    "  login $email\n",
+    "machine git.heroku.com\n",
+    "  password $api_key\n",
+    "  login $email\n",
+  );
+
+  chmod 0600, $path if !$exists;
+
+  return $path;
 }
 
 sub local_api_key {
   my $self = shift;
 
-  return if !-T $self->credentials_file;
+  return if ! -T $self->credentials_file;
 
-  #my $api_key = +(io->file($self->credentials_file)->slurp)[-1];
-  my $api_key = +(slurp $self->credentials_file)[-1];
-  chomp $api_key;
+  my $api_key = Net::Netrc->lookup('api.heroku.com')->password;
 
   return $api_key;
 }
@@ -269,7 +269,7 @@ sub prompt_user_pass {
   my $email = prompt('Email:', -stdio);
   chomp $email;
 
-  my $password = prompt('Password:', -echo=>'*', -stdio);
+  my $password = prompt('Password:', -echo => '*', -stdio);
   chomp $password;
 
   return (email => $email, password => $password);
@@ -280,8 +280,9 @@ sub create_repo {
 
   print "Creating git repo\n";
   my $git_dir =
-    File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
-  make_path($git_dir);
+    Mojo::File::tempdir($tmp_dir, 'mojo_deploy_git_XXXXXX')->make_path;
+    # File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
+  # make_path($git_dir);
 
   my $r = {
     work_tree => $home_dir,
@@ -300,9 +301,12 @@ sub fill_repo {
   my @ignore =
     git($r, 'ls-files' => '--others' => '-i' => '--exclude-standard');
 
-  my @files =
-    grep { my $file = $_; $file if !grep $file =~ /$_\W*/ => @ignore }
-    @$all_files;
+  my @files = grep {
+    my $file = $_;
+    $file if !grep {
+      $file =~ /$_\W*/
+    } @ignore
+  } @$all_files;
 
   # Add files filtered by .gitignore
   print "Adding file $_\n" for @files;
@@ -341,7 +345,7 @@ sub create_or_get_app {
   my $error  = $h->error;
 
   # Attempt retrieval
-  $res = shift @{[grep $_->{name} eq $opt->{name} => $h->apps]}
+  $res = shift @{[ grep { $_->{name} eq $opt->{name} } $h->apps ]}
     if $h->error and $h->error eq 'Name is already taken';
 
   print "Upload failed for $opt->{name}: " . $error . "\n" and exit if !$res;
@@ -353,9 +357,12 @@ sub remote_key_match {
   my $h = pop;
 
   my %remote_keys = map { $_->{public_key} => $_->{email} } $h->keys;
-  my @local_keys = map substr(slurp($_), 0, -1) => ssh_keys();
 
-  return grep defined $remote_keys{$_} => @local_keys;
+  my @local_keys = map {
+    substr(Mojo::File->new($_)->slurp, 0, -1)
+  } ssh_keys();
+
+  return grep { defined $remote_keys{$_} } @local_keys;
 }
 
 sub config_app {
@@ -372,7 +379,6 @@ sub verify_app {
   my ($h, $res) = @_;
 
   # This is the way Heroku's official command-line client does it.
-
   for (0 .. 5) {
     last if $h->app_created(name => $res->{name});
     sleep 1;
@@ -449,7 +455,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.22
+0.20
 
 =head1 AUTHOR
 

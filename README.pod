@@ -4,7 +4,7 @@
 
 Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
-=head1 USAGE
+=head1 SYNOPSIS
 
   script/my_app deploy heroku [OPTIONS]
 
@@ -19,9 +19,8 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
   These options are available:
     -n, --appname <name>      Specify app for deployment
-    -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
+    -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default).
     -c, --create              Create a new Heroku app
-    -v, --verbose             Verbose output (heroku response, git output)
     -h, --help                This message
 
 =head1 DESCRIPTION
@@ -30,7 +29,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 *NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
-*NOTE* This release works with Mojolicious versions 4.50 and above.  For older Mojolicious versions, please use 0.10 or before.
+*NOTE* This release works with Mojolicious versions 7.20 and above.  For older Mojolicious versions, please use 0.13 or before.
 
 =head1 WORKFLOW
 
@@ -65,7 +64,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.22
+0.20
 
 =head1 AUTHOR
 
@@ -76,5 +75,7 @@ Glen Hinkle C<tempire@cpan.org>
 MattOates
 
 briandfoy
+
+rage311
 
 =cut

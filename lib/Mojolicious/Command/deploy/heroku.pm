@@ -2,11 +2,8 @@ package Mojolicious::Command::deploy::heroku;
 use Mojo::Base 'Mojolicious::Command';
 
 use IO::Prompter;
-# use File::Path 'make_path';
-# use File::Slurp qw/ slurp write_file /;
 use File::Spec;
 use Mojo::File;
-use Getopt::Long qw/ GetOptions :config no_auto_abbrev no_ignore_case /;
 use IPC::Cmd 'can_run';
 use Net::Netrc;
 use Mojo::IOLoop;
@@ -19,40 +16,25 @@ our $VERSION = 0.20;
 
 has tmpdir           => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua               => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
-has description      => "Deploy Mojolicious app to Heroku.\n";
+has description      => "Deploy Mojolicious app to Heroku\n";
 has opt              => sub { {} };
-#has credentials_file => sub {"$ENV{HOME}/.heroku/credentials"};
 has credentials_file => sub { "$ENV{HOME}/.netrc" };
 has makefile         => 'Makefile.PL';
-has usage            => <<"EOF";
+has usage            => sub { shift->extract_usage };
 
-usage: $0 deploy heroku [OPTIONS]
-
-  # Create new app with randomly selected name and deploy
-  $0 deploy heroku -c
-
-  # Deploy to specified app and deploy (creates app if it does not exist)
-  $0 deploy heroku -n friggin-ponycorns
-
-These options are available:
-  -n, --appname <name>      Specify app name for deployment
-  -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
-  -c, --create              Create app with randomly selected name
-  -v, --verbose             Verbose output (heroku response, git output)
-  -h, --help                This message
-EOF
 
 sub opt_spec {
   my $self = shift;
   my $opt  = {};
 
-  return $opt
-    if GetOptions(
-      "appname|n=s" => sub { $opt->{name}    = pop },
-      "api-key|a=s" => sub { $opt->{api_key} = pop },
-      "create|c"    => sub { $opt->{create}  = pop },
-      "verbose|v"   => sub { $opt->{verbose} = pop },
-    );
+  Mojo::Util::getopt(
+    'appname|n=s' => \$opt->{name},
+    'api-key|a=s' => \$opt->{api_key},
+    'create|c'    => \$opt->{create},
+    #'verbose|v'   => \$opt->{verbose},
+  );
+
+  return $opt;
 }
 
 sub validate {
@@ -67,7 +49,7 @@ sub validate {
 
   # Create or appname
   push @errors => '--create or --appname must be specified'
-    if !defined $opt->{create} and !defined $opt->{name};
+    if !defined $opt->{create} && !defined $opt->{name};
 
   return @errors;
 }
@@ -95,7 +77,7 @@ sub run {
 
   # SSH key permissions
   if (!remote_key_match($h)) {
-    print "\nHeroku does not have any SSH keys stored for you.";
+    print "\nHeroku does not have any matching SSH keys stored for you.";
     my ($file, $key) = create_or_get_key();
 
     print "\nUploading SSH public key $file\n";
@@ -108,7 +90,7 @@ sub run {
     config_app(
       $h,
       create_or_get_app($h, $opt),
-      { BUILDPACK_URL => 'http://github.com/tempire/perloku.git' }
+      { BUILDPACK_URL => 'http://github.com/judofyr/perloku.git' }
     )
   );
 
@@ -188,9 +170,8 @@ sub generate_makefile {
     return $command->run;
   }
 
-  unless (qx/$^X -c $file/ =~ /syntax OK/) {
-    die "$file does not compile. Cannot continue.";
-  }
+  die "$file does not compile. Cannot continue."
+    unless (qx/$^X -c $file 2>&1/ =~ /syntax OK/);
 }
 
 sub generate_herokufile {
@@ -233,7 +214,7 @@ sub heroku_object {
 sub save_local_api_key {
   my ($self, $email, $api_key) = @_;
 
-  my $path = Mojo::File->new($credentials_file);
+  my $path = Mojo::File->new($self->credentials_file);
   my $exists = file_exists $path;
 
   $path->spurt(
@@ -278,11 +259,10 @@ sub prompt_user_pass {
 sub create_repo {
   my ($self, $home_dir, $tmp_dir) = @_;
 
-  print "Creating git repo\n";
+  print "\nCreating git repo\n";
   my $git_dir =
-    Mojo::File::tempdir($tmp_dir, 'mojo_deploy_git_XXXXXX')->make_path;
-    # File::Spec->catfile($tmp_dir, 'mojo_deploy_git', int rand 1000);
-  # make_path($git_dir);
+    Mojo::File::tempdir($tmp_dir . '/mojo_deploy_git_XXXXXXXX')->make_path;
+  print "$git_dir\n\n";
 
   my $r = {
     work_tree => $home_dir,
@@ -331,9 +311,12 @@ sub push_repo {
 sub git {
   my $r = shift;
   my $cmd =
-    "git -c core.autocrlf=false --work-tree=\"$r->{work_tree}\" --git-dir=\"$r->{git_dir}\" "
+    "git -c core.autocrlf=false "
+    . "--work-tree=\"$r->{work_tree}\" "
+    . "--git-dir=\"$r->{git_dir}\" "
     . join " " => @_;
-  return `$cmd`;
+
+  return system($cmd);
 }
 
 sub create_or_get_app {
@@ -394,7 +377,7 @@ sub verify_app {
 
 Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
-=head1 USAGE
+=head1 SYNOPSIS
 
   script/my_app deploy heroku [OPTIONS]
 
@@ -409,9 +392,8 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
   These options are available:
     -n, --appname <name>      Specify app for deployment
-    -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
+    -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default).
     -c, --create              Create a new Heroku app
-    -v, --verbose             Verbose output (heroku response, git output)
     -h, --help                This message
 
 =head1 DESCRIPTION
@@ -420,7 +402,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 *NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
-*NOTE* This release works with Mojolicious versions 4.50 and above.  For older Mojolicious versions, please use 0.10 or before.
+*NOTE* This release works with Mojolicious versions 7.20 and above.  For older Mojolicious versions, please use 0.13 or before.
 
 =head1 WORKFLOW
 
@@ -466,5 +448,7 @@ Glen Hinkle C<tempire@cpan.org>
 MattOates
 
 briandfoy
+
+rage311
 
 =cut

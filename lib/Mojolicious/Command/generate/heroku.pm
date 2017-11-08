@@ -23,8 +23,7 @@ sub run {
 __DATA__
 
 @@ perloku
-#!/bin/sh
-./<%= +(shift =~ qr|[\./]*(.+)|)[0] %> daemon --listen http://*:$PORT --mode production
+web: ./<%= +(shift =~ qr|[\./]*(.+)|)[0] %> daemon --listen http://*:$PORT --mode production
 
 __END__
 =head1 NAME

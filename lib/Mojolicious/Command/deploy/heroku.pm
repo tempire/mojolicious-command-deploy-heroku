@@ -30,7 +30,7 @@ sub opt_spec {
   Mojo::Util::getopt(
     'appname|n=s' => \$opt->{name},
     'api-key|a=s' => \$opt->{api_key},
-    'create|c'    => \$opt->{create},
+    'create|c:s'  => sub { $opt->{create} = $_[1] ? ($opt->{name} = $_[1]) : 1 },
     #'verbose|v'   => \$opt->{verbose},
   );
 
@@ -392,8 +392,8 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
   These options are available:
     -n, --appname <name>      Specify app for deployment
-    -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default).
-    -c, --create              Create a new Heroku app
+    -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default)
+    -c, --create [name]       Create a new Heroku app with an optional name
     -h, --help                This message
 
 =head1 DESCRIPTION
@@ -410,7 +410,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 =item 1) B<Heroku Service>
 
-L<https://api.heroku.com/signup>
+L<https://signup.heroku.com>
 
 =item 2) B<Generate Mojolicious app>
 
@@ -418,7 +418,7 @@ L<https://api.heroku.com/signup>
 
 =item 3) B<Deploy>
 
-  hello deploy heroku --create
+  hello deploy heroku --create [optional-name]
 
 The deploy command creates a git repository of the B<current directory's contents> in /tmp, and then pushes it to a remote heroku repository.
 

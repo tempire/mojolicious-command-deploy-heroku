@@ -90,7 +90,7 @@ sub run {
     config_app(
       $h,
       create_or_get_app($h, $opt),
-      { BUILDPACK_URL => 'http://github.com/judofyr/perloku.git' }
+      { BUILDPACK_URL => 'http://github.com/rage311/perloku.git' }
     )
   );
 

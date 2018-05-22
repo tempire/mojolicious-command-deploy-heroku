@@ -12,7 +12,7 @@ use Mojolicious::Command::generate::heroku;
 use Mojolicious::Command::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.20;
+our $VERSION = 0.23;
 
 has tmpdir           => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua               => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -28,7 +28,7 @@ sub opt_spec {
   my $opt  = {};
 
   Mojo::Util::getopt(
-    'appname|n=s' => \$opt->{name},
+    'name|n=s'    => \$opt->{name},
     'api-key|a=s' => \$opt->{api_key},
     'create|c:s'  => sub { $opt->{create} = $_[1] ? ($opt->{name} = $_[1]) : 1 },
     #'verbose|v'   => \$opt->{verbose},
@@ -177,7 +177,7 @@ sub generate_makefile {
 sub generate_herokufile {
   my $self = shift;
 
-  my $command = Mojolicious::Command::generate::heroku->new;
+  my $command = Mojolicious::Command::generate::heroku->new(app => $self->app);
 
   if (!file_exists($command->file)) {
     print $command->file . " not found.  Generating...\n";
@@ -311,10 +311,10 @@ sub push_repo {
 sub git {
   my $r = shift;
   my $cmd =
-    "git -c core.autocrlf=false "
+    'git -c core.autocrlf=false '
     . "--work-tree=\"$r->{work_tree}\" "
     . "--git-dir=\"$r->{git_dir}\" "
-    . join " " => @_;
+    . join ' ' => @_;
 
   return system($cmd);
 }
@@ -324,7 +324,7 @@ sub create_or_get_app {
 
   # Attempt create
   my %params = defined $opt->{name} ? (name => $opt->{name}) : ();
-  my $res    = {$h->create(%params)};
+  my $res    = { $h->create(%params) };
   my $error  = $h->error;
 
   # Attempt retrieval
@@ -391,7 +391,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
     script/my_app deploy heroku --name happy-cloud-1234
 
   These options are available:
-    -n, --appname <name>      Specify app for deployment
+    -n, --name <name>         Specify app for deployment
     -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default)
     -c, --create [name]       Create a new Heroku app with an optional name
     -h, --help                This message
@@ -427,8 +427,11 @@ The deploy command creates a git repository of the B<current directory's content
 =head1 SEE ALSO
 
 L<https://github.com/tempire/mojolicious-command-deploy-heroku>,
+
 L<https://github.com/tempire/perloku>,
+
 L<http://heroku.com/>,
+
 L<http://mojolicio.us>
 
 =head1 SOURCE
@@ -437,7 +440,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.20
+0.23
 
 =head1 AUTHOR
 

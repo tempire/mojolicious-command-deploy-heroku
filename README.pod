@@ -18,7 +18,7 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
     script/my_app deploy heroku --name happy-cloud-1234
 
   These options are available:
-    -n, --appname <name>      Specify app for deployment
+    -n, --name <name>         Specify app for deployment
     -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default)
     -c, --create [name]       Create a new Heroku app with an optional name
     -h, --help                This message
@@ -54,8 +54,11 @@ The deploy command creates a git repository of the B<current directory's content
 =head1 SEE ALSO
 
 L<https://github.com/tempire/mojolicious-command-deploy-heroku>,
+
 L<https://github.com/tempire/perloku>,
+
 L<http://heroku.com/>,
+
 L<http://mojolicio.us>
 
 =head1 SOURCE
@@ -64,7 +67,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.20
+0.23
 
 =head1 AUTHOR
 

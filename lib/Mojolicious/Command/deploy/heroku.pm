@@ -418,9 +418,13 @@ L<https://signup.heroku.com>
 
 =item 3) B<Deploy>
 
-  hello deploy heroku --create [optional-name]
+  ./hello deploy heroku --create [optional-name]
 
 The deploy command creates a git repository of the B<current directory's contents> in /tmp, and then pushes it to a remote heroku repository.
+
+For applications with additional dependencies, you will need to generate a Makefile.PL and manually add your dependencies to the "PREREQ_PM" section before deploying:
+
+  ./hello generate makefile
 
 =back
 

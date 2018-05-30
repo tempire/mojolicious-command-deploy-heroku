@@ -426,13 +426,13 @@ The deploy command creates a git repository of the B<current directory's content
 
 =head1 SEE ALSO
 
-L<https://github.com/tempire/mojolicious-command-deploy-heroku>,
+L<https://github.com/tempire/mojolicious-command-deploy-heroku>
 
-L<https://github.com/tempire/perloku>,
+L<https://github.com/tempire/perloku>
 
-L<http://heroku.com/>,
+L<http://heroku.com/>
 
-L<http://mojolicio.us>
+L<https://mojolicious.org>
 
 =head1 SOURCE
 

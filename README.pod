@@ -4,7 +4,7 @@
 
 Mojolicious::Command::deploy::heroku - Deploy to Heroku
 
-=head1 USAGE
+=head1 SYNOPSIS
 
   script/my_app deploy heroku [OPTIONS]
 
@@ -18,10 +18,9 @@ Mojolicious::Command::deploy::heroku - Deploy to Heroku
     script/my_app deploy heroku --name happy-cloud-1234
 
   These options are available:
-    -n, --appname <name>      Specify app for deployment
-    -a, --api-key <api_key>   Heroku API key (read from ~/.heroku/credentials by default).
-    -c, --create              Create a new Heroku app
-    -v, --verbose             Verbose output (heroku response, git output)
+    -n, --name <name>         Specify app for deployment
+    -a, --api-key <api_key>   Heroku API key (read from ~/.netrc by default)
+    -c, --create [name]       Create a new Heroku app with an optional name
     -h, --help                This message
 
 =head1 DESCRIPTION
@@ -30,7 +29,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 *NOTE* The deploy command itself works on Windows, but the Heroku service does not reliably accept deployments from Windows.  Your mileage may vary.
 
-*NOTE* This release works with Mojolicious versions 4.50 and above.  For older Mojolicious versions, please use 0.10 or before.
+*NOTE* This release works with Mojolicious versions 7.20 and above.  For older Mojolicious versions, please use 0.13 or before.
 
 =head1 WORKFLOW
 
@@ -38,7 +37,7 @@ L<Mojolicious::Command::deploy::heroku> deploys a Mojolicious app to Heroku.
 
 =item 1) B<Heroku Service>
 
-L<https://api.heroku.com/signup>
+L<https://signup.heroku.com>
 
 =item 2) B<Generate Mojolicious app>
 
@@ -46,18 +45,25 @@ L<https://api.heroku.com/signup>
 
 =item 3) B<Deploy>
 
-  hello deploy heroku --create
+  ./hello deploy heroku --create [optional-name]
 
 The deploy command creates a git repository of the B<current directory's contents> in /tmp, and then pushes it to a remote heroku repository.
+
+For applications with additional dependencies, you will need to generate a Makefile.PL and manually add your dependencies to the "PREREQ_PM" section before deploying:
+
+  ./hello generate makefile
 
 =back
 
 =head1 SEE ALSO
 
-L<https://github.com/tempire/mojolicious-command-deploy-heroku>,
-L<https://github.com/tempire/perloku>,
-L<http://heroku.com/>,
-L<http://mojolicio.us>
+L<https://github.com/tempire/mojolicious-command-deploy-heroku>
+
+L<https://github.com/tempire/perloku>
+
+L<http://heroku.com/>
+
+L<https://mojolicious.org>
 
 =head1 SOURCE
 
@@ -65,7 +71,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.22
+0.24
 
 =head1 AUTHOR
 
@@ -76,5 +82,7 @@ Glen Hinkle C<tempire@cpan.org>
 MattOates
 
 briandfoy
+
+rage311
 
 =cut

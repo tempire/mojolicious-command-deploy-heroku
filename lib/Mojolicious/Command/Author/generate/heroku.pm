@@ -1,4 +1,4 @@
-package Mojolicious::Command::generate::heroku;
+package Mojolicious::Command::Author::generate::heroku;
 use Mojo::Base 'Mojolicious::Command';
 use Mojo::Util 'class_to_file';
 
@@ -15,7 +15,9 @@ sub run {
     ? $0
     : 'script/' . class_to_file($class);
 
-  $self->render_to_rel_file(perloku => $self->file => $script_name);
+  $self->render_to_rel_file(
+    perloku => $self->file => { script_name => $script_name }
+  );
   $self->chmod_file($self->file => 0744);
 }
 
@@ -23,28 +25,27 @@ sub run {
 __DATA__
 
 @@ perloku
-#!/bin/sh
-./<%= +(shift =~ qr|[\./]*(.+)|)[0] %> daemon --listen http://*:$PORT --mode production
+web: ./<%= +($script_name =~ qr|[\./]*(.+)|)[0] %> daemon --listen http://*:$PORT --mode production
 
 __END__
 =head1 NAME
 
-Mojolicious::Command::generate::heroku - Heroku configuration generator command
+Mojolicious::Command::Author::generate::heroku - Heroku configuration generator command
 
 =head1 SYNOPSIS
 
-  use Mojolicious::Command::generate::heroku;
+  use Mojolicious::Command::Author::generate::heroku;
 
-  my $heroku = Mojolicious::Command::generate::heroku->new;
+  my $heroku = Mojolicious::Command::Author::generate::heroku->new;
   $heroku->run(@ARGV);
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Command::generate::heroku> is a heroku configuration generator.
+L<Mojolicious::Command::Author::generate::heroku> is a heroku configuration generator.
 
 =head1 ATTRIBUTES
 
-L<Mojolicious::Command::generate::heroku> inherits all attributes from
+L<Mojolicious::Command::Author::generate::heroku> inherits all attributes from
 L<Mojo::Command> and implements the following new ones.
 
 =head2 C<description>
@@ -63,7 +64,7 @@ Usage information for this command, used for the help screen.
 
 =head1 METHODS
 
-L<Mojolicious::Command::generate::heroku> inherits all methods from
+L<Mojolicious::Command::Author::generate::heroku> inherits all methods from
 L<Mojo::Command> and implements the following new ones.
 
 =head2 C<run>

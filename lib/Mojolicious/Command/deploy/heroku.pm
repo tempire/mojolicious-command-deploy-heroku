@@ -8,11 +8,11 @@ use IPC::Cmd 'can_run';
 use Net::Netrc;
 use Mojo::IOLoop;
 use Mojo::UserAgent;
-use Mojolicious::Command::generate::heroku;
-use Mojolicious::Command::generate::makefile;
+use Mojolicious::Command::Author::generate::heroku;
+use Mojolicious::Command::Author::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.23;
+our $VERSION = 0.24;
 
 has tmpdir           => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua               => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -48,7 +48,7 @@ sub validate {
   } qw/ git ssh ssh-keygen /;
 
   # Create or appname
-  push @errors => '--create or --appname must be specified'
+  push @errors => '--create or --name must be specified'
     if !defined $opt->{create} && !defined $opt->{name};
 
   return @errors;
@@ -162,7 +162,7 @@ sub create_or_get_key {
 sub generate_makefile {
   my $self = shift;
 
-  my $command = Mojolicious::Command::generate::makefile->new;
+  my $command = Mojolicious::Command::Author::generate::makefile->new;
   my $file    = $self->app->home->rel_file($self->makefile);
 
   if (!file_exists($file)) {
@@ -177,7 +177,8 @@ sub generate_makefile {
 sub generate_herokufile {
   my $self = shift;
 
-  my $command = Mojolicious::Command::generate::heroku->new(app => $self->app);
+  my $command =
+    Mojolicious::Command::Author::generate::heroku->new(app => $self->app);
 
   if (!file_exists($command->file)) {
     print $command->file . " not found.  Generating...\n";
@@ -316,7 +317,7 @@ sub git {
     . "--git-dir=\"$r->{git_dir}\" "
     . join ' ' => @_;
 
-  return system($cmd);
+  return wantarray ? qx{$cmd} : system($cmd);
 }
 
 sub create_or_get_app {
@@ -444,7 +445,7 @@ L<http://github.com/tempire/mojolicious-command-deploy-heroku>
 
 =head1 VERSION
 
-0.23
+0.24
 
 =head1 AUTHOR
 

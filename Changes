@@ -1,5 +1,9 @@
 This file documents the revision history for the Mojolicious::Command::deploy::heroku distribution.
 
+0.12    2015-05-17 00:00:00
+        - Hide passwords (MattOates)
+        - Check that Makefile.PL compiles before deploying (briandfoy)
+
 0.11    2014-06-27 00:00:00
         - Update Mojolicious dependency version (compatibility)
 

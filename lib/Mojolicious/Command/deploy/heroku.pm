@@ -11,10 +11,10 @@ use IPC::Cmd 'can_run';
 use Mojo::IOLoop;
 use Mojo::UserAgent;
 use Mojolicious::Command::generate::heroku;
-use Mojolicious::Command::generate::makefile;
+use Mojolicious::Command::Author::generate::makefile;
 use Net::Heroku;
 
-our $VERSION = 0.12;
+our $VERSION = 0.13;
 
 has tmpdir => sub { $ENV{MOJO_TMPDIR} || File::Spec->tmpdir };
 has ua => sub { Mojo::UserAgent->new->ioloop(Mojo::IOLoop->singleton) };
@@ -186,7 +186,7 @@ sub create_or_get_key {
 sub generate_makefile {
   my $self = shift;
 
-  my $command = Mojolicious::Command::generate::makefile->new;
+  my $command = Mojolicious::Command::Author::generate::makefile->new;
   my $file    = $self->app->home->rel_file($self->makefile);
 
   if (!file_exists($file)) {
@@ -462,5 +462,7 @@ Glen Hinkle C<tempire@cpan.org>
 MattOates
 
 briandfoy
+
+Mirko Westermeier
 
 =cut
